@@ -1,17 +1,12 @@
 Function Install-O365 {
-	<#Download the installer from https://www.microsoft.com/en-us/download/confirmation.aspx?id=49117
-	Extract the Setup.exe and upload it somewhere
-	It helps to keep it up to date
-	https://docs.microsoft.com/en-us/officeupdates/odt-release-history
-	#>
-	$O365Setupexe = #Where did you upload it?
+$O365Setupexe = "https://raw.githubusercontent.com/PER-IT/PPKG/main/setup.exe"
 	Write-Host "Downloading MS Office"
 		Enable-SSL
 		New-Item -ItemType Directory -Force -Path "C:\IT\O365"
 		(New-Object System.Net.WebClient).DownloadFile($O365Setupexe, 'C:\IT\O365\setup.exe')
 	Write-Host "Downloading MS Office config files"
-		$O365ConfigSource = "$ExternalSitesPath" + $SiteCode + "/" + $SiteCode + "_O365_Config.xml"
-		$O365ConfigDest = "C:\IT\O365\" + $SiteCode + "_O365_Config.xml"
+		$O365ConfigSource = "https://raw.githubusercontent.com/PER-IT/PPKG/main/configuration-Office365-x64.xml"
+		$O365ConfigDest = "C:\IT\O365\configuration-Office365-x64.xml"
 		(New-Object System.Net.WebClient).DownloadFile($O365ConfigSource, $O365ConfigDest)
 	Write-Host "Installing Office"
 		& C:\IT\O365\setup.exe /configure $O365ConfigDest | Wait-Process
@@ -47,5 +42,6 @@ Function Install-O365 {
 		$WScriptShell = New-Object -ComObject WScript.Shell
 		$Shortcut = $WScriptShell.CreateShortcut($ShortcutFile)
 		$Shortcut.TargetPath = $TargetFile
-		$Shortcut.Save()
+		$Shortcut.Save() 
+
 }
