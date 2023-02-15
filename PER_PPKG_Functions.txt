@@ -105,7 +105,7 @@ Function Update-Windows {
 
 
 
-Function Registry-InitialKeys
+Function Registry-InitialKeys {
 
 
 
