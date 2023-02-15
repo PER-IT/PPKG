@@ -14,7 +14,7 @@ Function Install-O365 {
 		(New-Object System.Net.WebClient).DownloadFile($O365ConfigSource, $O365ConfigDest)
 	Write-Host "Installing Office"
 		& C:\IT\O365\setup.exe /configure $O365ConfigDest | Wait-Process
-
+}
 
 Function Connect-Wifi {
 	param
