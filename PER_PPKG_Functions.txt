@@ -105,9 +105,161 @@ Function Update-Windows {
 
 
 
-Function Registry-InitialKeys {
+Function Registry-InitialSetup {
 
+##Copy Start Menu & Taskbar Layout
+Copy-Item -Path "C:\IT\PPKG\LayoutModification.xml" -Destination "C:\Users\Default\AppData\Local\Microsoft\Windows\Shell"
 
+##Copy Task Script & Batch File
+if(-not(Test-Path("C:\Users\Public\Provisioning")))
+{
+New-Item -Path "C:\Users\Public\" -Name "Provisioning" -ItemType "directory" -Force
+Copy-Item -Path "C:\IT\PPKG\UserProvisioning.bat" -Destination "C:\Users\Public\Provisioning\UserProvisioning.bat" -Force
+Copy-Item -Path "C:\IT\PPKG\UserProvisioning.ps1" -Destination "C:\Users\Public\Provisioning\UserProvisioning.ps1" -Force
+}
+Else{
+Copy-Item -Path "C:\IT\PPKG\UserProvisioning.bat" -Destination "C:\Users\Public\Provisioning\UserProvisioning.bat" -Force
+Copy-Item -Path "C:\IT\PPKG\UserProvisioning.ps1" -Destination "C:\Users\Public\Provisioning\UserProvisioning.ps1" -Force
+}
+
+##Create Tasks Triggered @ User Login
+$triggerMain = New-ScheduledTaskTrigger -atlogon
+$actionMain = New-ScheduledTaskAction -Execute "C:\Users\Public\Provisioning\UserProvisioning.bat"
+$Tasksettings = New-ScheduledTaskSettingsSet -DontStopIfGoingOnBatteries -AllowStartIfOnBatteries
+$Principal = New-ScheduledTaskPrincipal -GroupId "BUILTIN\USERS"
+
+Register-ScheduledTask -Action $actionMain -Trigger $triggerMain -TaskName “User Account Provisioning” -Description “Provisions User Accounts” -Settings $Tasksettings -Principal $Principal
+
+##Add HKLM Registry Entries
+$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\Edge\Recommended"
+$Name = "DefaultSearchProviderName"
+$value = "Google"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+
+$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\Edge\Recommended"
+$Name = "DefaultSearchProviderSearchURL"
+$value = "{google:baseURL}search?q={searchTerms}&{google:RLZ}{google:originalQueryForSuggestion}{google:assistedQueryStats}{google:searchFieldtrialParameter}{google:searchClient}{google:sourceId}ie={inputEncoding}"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+
+$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\Edge\Recommended"
+$Name = "DefaultSearchProviderEnabled"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\OneDrive"
+$Name = "SilentAccountConfig"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\OneDrive"
+$Name = "KFMSilentOptIn"
+$value = "23889ccd-1612-4908-9333-91802893aab8"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+
+$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\OneDrive"
+$Name = "KFMSilentOptInWithNotification"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\OneDrive"
+$Name = "KFMSilentOptInDesktop"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\OneDrive"
+$Name = "KFMSilentOptInDocuments"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\OneDrive"
+$Name = "KFMSilentOptInPictures"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\OneDrive"
+$Name = "FilesOnDemandEnabled"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
 
 
 
