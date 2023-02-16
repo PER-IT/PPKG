@@ -265,3 +265,16 @@ ELSE
 
 
 }
+
+Function Remove-PPKGInstallFolder {
+	Write-Host "Cleaning up and Restarting Computer"
+	PowerShell.exe -NoProfile -ExecutionPolicy Bypass -Command "If (Test-Path C:\IT\PPKG){Remove-Item -LiteralPath 'C:\IT\PPKG' -Force -Recurse};Restart-Computer -Force"
+	Stop-transcript
+	Restart-Computer -Force
+}
+
+Function Start-PPKGLog ([String] $LogLabel) {
+	Write-Host "Making a log file for debugging"
+		$LogPath = "C:\IT\PPKG.log"
+		Start-Transcript -path $LogPath -Force -Append
+}
