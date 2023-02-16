@@ -273,7 +273,7 @@ Function Remove-PPKGInstallFolder {
 	Restart-Computer -Force
 }
 
-Function Start-PPKGLog ([String] $LogLabel) {
+Function Start-PPKGLog {
 	Write-Host "Making a log file for debugging"
 		$LogPath = "C:\IT\PPKG.log"
 		Start-Transcript -path $LogPath -Force -Append
