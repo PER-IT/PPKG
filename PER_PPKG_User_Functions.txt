@@ -1,0 +1,975 @@
+Function UserSetup {
+function Test-RegistryValue {
+
+param (
+
+ [parameter(Mandatory=$true)]
+ [ValidateNotNullOrEmpty()]$Path,
+
+[parameter(Mandatory=$true)]
+ [ValidateNotNullOrEmpty()]$Value
+)
+
+try {
+
+Get-ItemProperty -Path $Path | Select-Object -ExpandProperty $Value -ErrorAction Stop | Out-Null
+ return $true
+ }
+
+catch {
+
+return $false
+
+}
+
+}
+
+# Check if provisioning has already been completed
+
+$FirstRun = "HKCU:\Environment"
+
+if(-not (Test-RegistryValue -Path $FirstRun -Value "Provisioning Complete")){
+
+# Check & stop if PER user account
+
+if(-not($env:username -eq "PER"))
+{
+# Check if OneDrive installed
+
+$OneDrivePath = "C:\Users\$($env:username)\OneDrive - Private Equity Recruitment Ltd"
+$UPN = whoami /upn
+$XDocs = "odopen://sync?userEmail=$UPN&isSiteAdmin=0&siteId={7b0e5e60-fd22-4da5-aa17-1340a7070695}&webId={575f6211-67e1-43ef-ad6e-53b4e00225d0}&webTitle=X Docs&webTemplate=64&webUrl=https://perecruit.sharepoint.com/sites/xdocs&onPrem=0&libraryType=3&listId={19340D54-85E0-4F25-B453-8AB222133B64}&listTitle=Documents&scope=OPENLIST" 
+$YDocs = "odopen://sync?userEmail=$UPN&isSiteAdmin=0&siteId={1b2ea34c-e8fc-4a40-b289-948264b66b55}&webId={575f6211-67e1-43ef-ad6e-53b4e00225d0}&webTitle=Y Docs&webTemplate=64&webUrl=https://perecruit.sharepoint.com/sites/ydocs&onPrem=0&libraryType=3&listId={19340D54-85E0-4F25-B453-8AB222133B64}&listTitle=Documents&scope=OPENLIST" 
+$Asia = "odopen://sync?userEmail=$UPN&isSiteAdmin=0&siteId={d9d56861-5e68-4879-aea0-616afd65d3ea}&webId={f2445e78-9b42-4088-9f46-57a49ab7b358}&webTitle=Asia&webTemplate=64&webUrl=https://perecruit.sharepoint.com/sites/asia&onPrem=0&libraryType=3&listId={A77C897F-E420-420F-AEB4-73FD846DADBB}&listTitle=Documents&scope=OPENLIST" 
+$LatAm = "odopen://sync?userEmail=$UPN&isSiteAdmin=0&siteId={e5b2bb99-38a4-4d8e-bb57-7806db855a51}&webId={f2445e78-9b42-4088-9f46-57a49ab7b358}&webTitle=LatAm&webTemplate=64&webUrl=https://perecruit.sharepoint.com/sites/latam&onPrem=0&libraryType=3&listId={A77C897F-E420-420F-AEB4-73FD846DADBB}&listTitle=Documents&scope=OPENLIST" 
+$Templates = "odopen://sync?userEmail=$UPN&isSiteAdmin=0&siteId={87c2b8ae-fc9d-45e4-9038-00b45151a46e}&webId={575f6211-67e1-43ef-ad6e-53b4e00225d0}&webTitle=PER Templates&webTemplate=64&webUrl=https://perecruit.sharepoint.com/sites/pertemplates&onPrem=0&libraryType=3&listId={19340D54-85E0-4F25-B453-8AB222133B64}&listTitle=Documents&scope=OPENLIST" 
+
+If(-not (Test-Path $OneDrivePath))
+{DO
+    {
+		Start-Sleep -Seconds 1
+
+        }
+        Until (Test-Path $OneDrivePath)
+    }
+    
+ 
+    $path = "C:\Users\$($env:username)\Private Equity Recruitment Ltd\PER Templates - Documents"
+    if(-not (Test-Path $path))
+    {      start $Templates
+    DO
+    {
+		Start-Sleep -Seconds 1
+
+        }
+        Until (Test-Path $path)
+    }
+
+    
+
+#Add Registry Keys
+$registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Feeds"
+$Name = "ShellFeedsTaskbarViewMode"
+$value = "0"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search"
+$Name = "SearchboxTaskbarMode"
+$value = "0"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\Software\Microsoft\Office\16.0\Outlook\AutoDiscover"
+$Name = "ZeroConfigExchange"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\SOFTWARE\Microsoft\Office\16.0\Common\General"
+$Name = "ShownFileFmtPrompt"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\SOFTWARE\Microsoft\Office\16.0\Common\General"
+$Name = "AcceptAllEulas"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\SOFTWARE\Microsoft\Office\16.0\Common\General"
+$Name = "ShownFirstRunOptin"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\SOFTWARE\Microsoft\Office\16.0\Common\Licensing"
+$Name = "EulasSetAccepted"
+$value = "16,0,"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+
+$registryPath = "HKCU:\SOFTWARE\Microsoft\Office\16.0\Word\Security\Trusted Locations\Location3"
+$Name = "Path"
+$value = "GlobalTemplateDir"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+
+$registryPath = "HKCU:\SOFTWARE\Microsoft\Office\16.0\Word\Security\Trusted Locations\Location3"
+$Name = "Description"
+$value = "3"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+
+$registryPath = "HKCU:\SOFTWARE\Microsoft\Office\16.0\Common\General"
+$Name = "FirstRun"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\SOFTWARE\Microsoft\Office\16.0\Common\General"
+$Name = "FileFormatBallotBoxAppIDBootedOnce"
+$value = "0"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\SOFTWARE\Microsoft\Office\16.0\Common\General"
+$Name = "FileFormatBallotBoxTelemetryEventSent"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\SOFTWARE\Microsoft\Office\16.0\Common\General"
+$Name = "FileFormatBallotBoxShowAttempts"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\SOFTWARE\Microsoft\Office\16.0\Common\General"
+$Name = "FileFormatBallotBoxTelemetryConfirmationEventSent"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\SOFTWARE\Microsoft\Office\16.0\Common\General"
+$Name = "FileFormatBallotBoxTelemetrySent"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$OutlookPath = "HKCU:\SOFTWARE\Microsoft\Office\16.0\Outlook\Setup"
+
+$OutlookPathx64 = "C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE"
+$OutlookPathx32 = "C:\Program Files (x86)\Microsoft Office\root\Office16\OUTLOOK.EXE"
+
+if(Test-Path $OutlookPathx64)
+{Start-Process -FilePath "C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE" -WindowStyle Minimized}
+Else
+{if(test-path $OutlookPathx32)
+{Start-Process -FilePath "C:\Program Files (x86)\Microsoft Office\root\Office16\OUTLOOK.EXE" -WindowStyle Minimized}
+}
+
+
+
+
+DO
+  {
+    Start-Sleep -Seconds 1
+  }
+    Until
+     (Test-Path $OutlookPath)
+
+
+DO
+   {
+     Start-Sleep -Seconds 1
+   }
+     Until
+     (Test-RegistryValue -Path $OutlookPath -Value "First-Run")
+   Start-Sleep -Seconds 5
+
+Stop-Process -Name OUTLOOK
+
+if(Test-Path -Path "C:\Users\$($env:username)\OneDrive - Private Equity Recruitment Ltd\Outlook.xml")
+{
+Copy-Item -Path "C:\Users\$($env:username)\OneDrive - Private Equity Recruitment Ltd\Outlook.xml" -Destination "C:\Users\$($env:username)\AppData\Roaming\Microsoft\Outlook\Outlook.xml" -Force
+}
+
+
+Else { if(Test-Path -Path "C:\Users\$($env:username)\OneDrive - Private Equity Recruitment Ltd\O365.xml")
+{
+Copy-Item -Path "C:\Users\$($env:username)\OneDrive - Private Equity Recruitment Ltd\O365.xml" -Destination "C:\Users\$($env:username)\AppData\Roaming\Microsoft\Outlook\O365.xml" -Force
+}
+
+
+Else{ if(Test-Path -Path "C:\Users\$($env:username)\OneDrive - Private Equity Recruitment Ltd\O3652.xml")
+{
+Copy-Item -Path "C:\Users\$($env:username)\OneDrive - Private Equity Recruitment Ltd\O3652.xml" -Destination "C:\Users\$($env:username)\AppData\Roaming\Microsoft\Outlook\O3652.xml" -Force
+}
+
+}
+}
+
+$registryPath = "HKCU:\SOFTWARE\Microsoft\Office\16.0\Outlook\Preferences"
+$Name = "DensitySetting"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force    
+}
+
+$registryPath = "HKCU:\Software\Microsoft\Office\16.0\Common\General"
+$Name = "Signatures"
+$value = "..\\..\\..\\OneDrive - Private Equity Recruitment Ltd\\Signatures"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force 
+}
+
+$registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
+$Name = "Communicator"
+$value = "C:\Program Files (x86)\CloudCall\Communicator\communicator.exe"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force 
+}
+
+$registryPath = "HKCU:\Control Panel\Desktop"
+$Name = "ScreenSaverIsSecure"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force 
+}
+
+$registryPath = "HKCU:\Control Panel\Desktop"
+$Name = "ScreenSaveTimeOut"
+$value = "300"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force 
+}
+
+$registryPath = "HKCU:\Control Panel\Desktop"
+$Name = "SCRNSAVE.EXE"
+$value = "C:\\WINDOWS\\system32\\Ribbons.scr"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force 
+}
+
+$registryPath = "HKCU:\Control Panel\Desktop"
+$Name = "LockScreenAutoLockActive"
+$value = "0"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force 
+}
+
+
+$registryPath = "HKCU:\Software\Microsoft\Office\16.0\Outlook\Preferences"
+$Name = "ShowAutoSug"
+$value = "0"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\Software\Microsoft\Office\16.0\Outlook\Preferences"
+$Name = "ModuleOrderAB"
+$value = "1,2,4,5,6,7,3,8,9"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+
+$registryPath = "HKCU:\Software\Microsoft\Office\16.0\Outlook\Preferences"
+$Name = "NumBigModulesAB"
+$value = "3"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\Software\Microsoft\Office\16.0\Outlook\Options\WunderBar"
+$Name = "EnableAutoSwitchingVerticalToHorizontal"
+$value = "0"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\Software\Microsoft\Office\16.0\Common\General"
+$Name = "DisableOpeningLinksInApp"
+$value = "0"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\Software\Microsoft\Office\16.0\Outlook\Options\WunderBar"
+$Name = "EnableAutoSwitchingHorizontalToVertical"
+$value = "0"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\Software\Policies\Microsoft\Office\16.0\Outlook\Cached Mode"
+$Name = "CacheOthersMail"
+$value = "0"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\Software\Microsoft\Office\16.0\Outlook\Options"
+$Name = "RenderForMonitorDpi"
+$value = "0"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\Software\Microsoft\Office\16.0\Outlook\Options\Spelling"
+$Name = "Check"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\Software\Microsoft\Office\16.0\Outlook\Options\General"
+$Name = "SAVE_LOC"
+$value = "6"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\Software\Microsoft\Office\16.0\Word\Options"
+$Name = "RenderForMonitorDpi"
+$value = "0"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Feeds"
+$Name = "ShellFeedsTaskbarViewMode"
+$value = "2"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\Software\Microsoft\Office\16.0\Common\MailSettings"
+$Name = "Template"
+$value = "2"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType ExpandString -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType ExpandString -Force
+}
+
+$registryPath = "HKCU:\Software\Microsoft\Office\16.0\Common\MailSettings"
+$Name = "MarkCommentsWith"
+$YourInput ="57,00,69,00,6c,00,6c,00,69,00,61,00,6d,00,20,00,54,00,6f,00,6d,00,6c,00,69,00,6e,00,73,00,6f,00,6e,00,00,00"
+
+$value = $YourInput.Split(',') | % { "0x$_"}
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType Binary -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType Binary -Force
+}
+
+$registryPath = "HKCU:\Software\Microsoft\Office\16.0\Common\MailSettings"
+$Name = "ComposeFontComplex"
+$YourInput ="3c,68,74,6d,6c,3e,0d,0a,0d,0a,3c,68,65,61,64,3e,0d,0a,3c,73,74,79,6c,65,3e,0d,0a,0d,0a,20,2f,2a,20,53,74,79,6c,65,20,44,65,66,69,6e,69,74,69,6f,6e,73,20,2a,2f,0d,0a,20,73,70,61,6e,2e,50,65,72,73,6f,6e,61,6c,43,6f,6d,70,6f,73,65,53,74,79,6c,65,0d,0a,09,7b,6d,73,6f,2d,73,74,79,6c,65,2d,6e,61,6d,65,3a,22,50,65,72,73,6f,6e,61,6c,20,43,6f,6d,70,6f,73,65,20,53,74,79,6c,65,22,3b,0d,0a,09,6d,73,6f,2d,73,74,79,6c,65,2d,74,79,70,65,3a,70,65,72,73,6f,6e,61,6c,2d,63,6f,6d,70,6f,73,65,3b,0d,0a,09,6d,73,6f,2d,73,74,79,6c,65,2d,6e,6f,73,68,6f,77,3a,79,65,73,3b,0d,0a,09,6d,73,6f,2d,73,74,79,6c,65,2d,75,6e,68,69,64,65,3a,6e,6f,3b,0d,0a,09,6d,73,6f,2d,61,6e,73,69,2d,66,6f,6e,74,2d,73,69,7a,65,3a,31,31,2e,30,70,74,3b,0d,0a,09,6d,73,6f,2d,62,69,64,69,2d,66,6f,6e,74,2d,73,69,7a,65,3a,31,31,2e,30,70,74,3b,0d,0a,09,66,6f,6e,74,2d,66,61,6d,69,6c,79,3a,22,43,61,6c,69,62,72,69,22,2c,73,61,6e,73,2d,73,65,72,69,66,3b,0d,0a,09,6d,73,6f,2d,61,73,63,69,69,2d,66,6f,6e,74,2d,66,61,6d,69,6c,79,3a,43,61,6c,69,62,72,69,3b,0d,0a,09,6d,73,6f,2d,61,73,63,69,69,2d,74,68,65,6d,65,2d,66,6f,6e,74,3a,6d,69,6e,6f,72,2d,6c,61,74,69,6e,3b,0d,0a,09,6d,73,6f,2d,68,61,6e,73,69,2d,66,6f,6e,74,2d,66,61,6d,69,6c,79,3a,43,61,6c,69,62,72,69,3b,0d,0a,09,6d,73,6f,2d,68,61,6e,73,69,2d,74,68,65,6d,65,2d,66,6f,6e,74,3a,6d,69,6e,6f,72,2d,6c,61,74,69,6e,3b,0d,0a,09,6d,73,6f,2d,62,69,64,69,2d,66,6f,6e,74,2d,66,61,6d,69,6c,79,3a,22,54,69,6d,65,73,20,4e,65,77,20,52,6f,6d,61,6e,22,3b,0d,0a,09,6d,73,6f,2d,62,69,64,69,2d,74,68,65,6d,65,2d,66,6f,6e,74,3a,6d,69,6e,6f,72,2d,62,69,64,69,3b,0d,0a,09,63,6f,6c,6f,72,3a,23,35,39,35,39,35,39,3b,0d,0a,09,6d,73,6f,2d,74,68,65,6d,65,63,6f,6c,6f,72,3a,74,65,78,74,31,3b,0d,0a,09,6d,73,6f,2d,74,68,65,6d,65,74,69,6e,74,3a,31,36,36,3b,7d,0d,0a,2d,2d,3e,0d,0a,3c,2f,73,74,79,6c,65,3e,0d,0a,3c,2f,68,65,61,64,3e,0d,0a,0d,0a,3c,2f,68,74,6d,6c,3e,0d,0a"
+
+$value = $YourInput.Split(',') | % { "0x$_"}
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType Binary -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType Binary -Force
+}
+
+$registryPath = "HKCU:\Software\Microsoft\Office\16.0\Common\MailSettings"
+$Name = "ComposeFontSimple"
+$YourInput ="3c,00,00,00,1f,00,00,f8,00,00,00,00,dc,00,00,00,00,00,00,00,a6,ff,00,dd,00,22,43,61,6c,69,62,72,69,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00"
+
+$value = $YourInput.Split(',') | % { "0x$_"}
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType Binary -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType Binary -Force
+}
+
+$registryPath = "HKCU:\Software\Microsoft\Office\16.0\Common\MailSettings"
+$Name = "ReplyFontComplex"
+$YourInput ="3c,68,74,6d,6c,3e,0d,0a,0d,0a,3c,68,65,61,64,3e,0d,0a,3c,73,74,79,6c,65,3e,0d,0a,0d,0a,20,2f,2a,20,53,74,79,6c,65,20,44,65,66,69,6e,69,74,69,6f,6e,73,20,2a,2f,0d,0a,20,73,70,61,6e,2e,50,65,72,73,6f,6e,61,6c,52,65,70,6c,79,53,74,79,6c,65,0d,0a,09,7b,6d,73,6f,2d,73,74,79,6c,65,2d,6e,61,6d,65,3a,22,50,65,72,73,6f,6e,61,6c,20,52,65,70,6c,79,20,53,74,79,6c,65,22,3b,0d,0a,09,6d,73,6f,2d,73,74,79,6c,65,2d,74,79,70,65,3a,70,65,72,73,6f,6e,61,6c,2d,72,65,70,6c,79,3b,0d,0a,09,6d,73,6f,2d,73,74,79,6c,65,2d,6e,6f,73,68,6f,77,3a,79,65,73,3b,0d,0a,09,6d,73,6f,2d,73,74,79,6c,65,2d,75,6e,68,69,64,65,3a,6e,6f,3b,0d,0a,09,6d,73,6f,2d,61,6e,73,69,2d,66,6f,6e,74,2d,73,69,7a,65,3a,31,31,2e,30,70,74,3b,0d,0a,09,6d,73,6f,2d,62,69,64,69,2d,66,6f,6e,74,2d,73,69,7a,65,3a,31,31,2e,30,70,74,3b,0d,0a,09,66,6f,6e,74,2d,66,61,6d,69,6c,79,3a,22,43,61,6c,69,62,72,69,22,2c,73,61,6e,73,2d,73,65,72,69,66,3b,0d,0a,09,6d,73,6f,2d,61,73,63,69,69,2d,66,6f,6e,74,2d,66,61,6d,69,6c,79,3a,43,61,6c,69,62,72,69,3b,0d,0a,09,6d,73,6f,2d,61,73,63,69,69,2d,74,68,65,6d,65,2d,66,6f,6e,74,3a,6d,69,6e,6f,72,2d,6c,61,74,69,6e,3b,0d,0a,09,6d,73,6f,2d,68,61,6e,73,69,2d,66,6f,6e,74,2d,66,61,6d,69,6c,79,3a,43,61,6c,69,62,72,69,3b,0d,0a,09,6d,73,6f,2d,68,61,6e,73,69,2d,74,68,65,6d,65,2d,66,6f,6e,74,3a,6d,69,6e,6f,72,2d,6c,61,74,69,6e,3b,0d,0a,09,6d,73,6f,2d,62,69,64,69,2d,66,6f,6e,74,2d,66,61,6d,69,6c,79,3a,22,54,69,6d,65,73,20,4e,65,77,20,52,6f,6d,61,6e,22,3b,0d,0a,09,6d,73,6f,2d,62,69,64,69,2d,74,68,65,6d,65,2d,66,6f,6e,74,3a,6d,69,6e,6f,72,2d,62,69,64,69,3b,0d,0a,09,63,6f,6c,6f,72,3a,23,35,39,35,39,35,39,3b,0d,0a,09,6d,73,6f,2d,74,68,65,6d,65,63,6f,6c,6f,72,3a,74,65,78,74,31,3b,0d,0a,09,6d,73,6f,2d,74,68,65,6d,65,74,69,6e,74,3a,31,36,36,3b,7d,0d,0a,2d,2d,3e,0d,0a,3c,2f,73,74,79,6c,65,3e,0d,0a,3c,2f,68,65,61,64,3e,0d,0a,0d,0a,3c,2f,68,74,6d,6c,3e,0d,0a"
+
+$value = $YourInput.Split(',') | % { "0x$_"}
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType Binary -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType Binary -Force
+}
+
+$registryPath = "HKCU:\Software\Microsoft\Office\16.0\Common\MailSettings"
+$Name = "ReplyFontSimple"
+$YourInput ="3c,00,00,00,1f,00,00,f8,00,00,00,00,dc,00,00,00,00,00,00,00,a6,ff,00,dd,00,22,43,61,6c,69,62,72,69,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00"
+
+$value = $YourInput.Split(',') | % { "0x$_"}
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType Binary -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType Binary -Force
+}
+
+$registryPath = "HKCU:\Software\Microsoft\Office\16.0\Common\MailSettings"
+$Name = "TextFontComplex"
+$YourInput ="3c,68,74,6d,6c,3e,0d,0a,0d,0a,3c,68,65,61,64,3e,0d,0a,3c,73,74,79,6c,65,3e,0d,0a,0d,0a,20,2f,2a,20,53,74,79,6c,65,20,44,65,66,69,6e,69,74,69,6f,6e,73,20,2a,2f,0d,0a,20,70,2e,4d,73,6f,50,6c,61,69,6e,54,65,78,74,2c,20,6c,69,2e,4d,73,6f,50,6c,61,69,6e,54,65,78,74,2c,20,64,69,76,2e,4d,73,6f,50,6c,61,69,6e,54,65,78,74,0d,0a,09,7b,6d,73,6f,2d,73,74,79,6c,65,2d,6e,6f,73,68,6f,77,3a,79,65,73,3b,0d,0a,09,6d,73,6f,2d,73,74,79,6c,65,2d,70,72,69,6f,72,69,74,79,3a,39,39,3b,0d,0a,09,6d,73,6f,2d,73,74,79,6c,65,2d,6c,69,6e,6b,3a,22,50,6c,61,69,6e,20,54,65,78,74,20,43,68,61,72,22,3b,0d,0a,09,6d,61,72,67,69,6e,3a,30,63,6d,3b,0d,0a,09,6d,61,72,67,69,6e,2d,62,6f,74,74,6f,6d,3a,2e,30,30,30,31,70,74,3b,0d,0a,09,6d,73,6f,2d,70,61,67,69,6e,61,74,69,6f,6e,3a,77,69,64,6f,77,2d,6f,72,70,68,61,6e,3b,0d,0a,09,66,6f,6e,74,2d,73,69,7a,65,3a,31,31,2e,30,70,74,3b,0d,0a,09,6d,73,6f,2d,62,69,64,69,2d,66,6f,6e,74,2d,73,69,7a,65,3a,31,30,2e,35,70,74,3b,0d,0a,09,66,6f,6e,74,2d,66,61,6d,69,6c,79,3a,22,43,61,6c,69,62,72,69,22,2c,73,61,6e,73,2d,73,65,72,69,66,3b,0d,0a,09,6d,73,6f,2d,66,61,72,65,61,73,74,2d,66,6f,6e,74,2d,66,61,6d,69,6c,79,3a,43,61,6c,69,62,72,69,3b,0d,0a,09,6d,73,6f,2d,66,61,72,65,61,73,74,2d,74,68,65,6d,65,2d,66,6f,6e,74,3a,6d,69,6e,6f,72,2d,6c,61,74,69,6e,3b,0d,0a,09,6d,73,6f,2d,62,69,64,69,2d,66,6f,6e,74,2d,66,61,6d,69,6c,79,3a,22,54,69,6d,65,73,20,4e,65,77,20,52,6f,6d,61,6e,22,3b,0d,0a,09,6d,73,6f,2d,62,69,64,69,2d,74,68,65,6d,65,2d,66,6f,6e,74,3a,6d,69,6e,6f,72,2d,62,69,64,69,3b,0d,0a,09,63,6f,6c,6f,72,3a,23,35,39,35,39,35,39,3b,0d,0a,09,6d,73,6f,2d,74,68,65,6d,65,63,6f,6c,6f,72,3a,74,65,78,74,31,3b,0d,0a,09,6d,73,6f,2d,74,68,65,6d,65,74,69,6e,74,3a,31,36,36,3b,0d,0a,09,6d,73,6f,2d,66,61,72,65,61,73,74,2d,6c,61,6e,67,75,61,67,65,3a,45,4e,2d,55,53,3b,7d,0d,0a,2d,2d,3e,0d,0a,3c,2f,73,74,79,6c,65,3e,0d,0a,3c,2f,68,65,61,64,3e,0d,0a,0d,0a,3c,2f,68,74,6d,6c,3e,0d,0a"
+
+$value = $YourInput.Split(',') | % { "0x$_"}
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType Binary -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType Binary -Force
+}
+
+$registryPath = "HKCU:\Software\Microsoft\Office\16.0\Common\MailSettings"
+$Name = "TextFontSimple"
+$YourInput ="3c,00,00,00,1f,00,00,f8,00,00,00,00,dc,00,00,00,00,00,00,00,a6,ff,00,dd,00,22,43,61,6c,69,62,72,69,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00"
+
+$value = $YourInput.Split(',') | % { "0x$_"}
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType Binary -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType Binary -Force
+}
+
+$registryPath = "HKCU:\Software\Microsoft\Office\Outlook\Settings\Data"
+$EmailKey = "HKCU:\SOFTWARE\Microsoft\OneDrive\Accounts\Business1"
+$EmailObj = (Get-ItemProperty -Path $EmailKey -Name "UserEmail")
+
+$Email = $EmailObj.UserEmail
+
+$Name = $Email+"_EnableSuggestedReplies"
+
+$Value ='{"name":"EnableSuggestedReplies","itemClass":"","id":"","scope":"'+$email+'","parentSetting":"","secondaryKey":"","status":"UNKNOWN","type":"Bool","timestamp":0,"metadata":"","value":"false","isFirstSync":"false","source":"UserOverride"}'
+
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $Value -PropertyType STRING -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $Value -PropertyType STRING -Force
+}
+
+$registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+$Name = "ShowCortanaButton"
+$value = "0"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+$Name = "ShowTaskViewButton"
+$value = "0"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+Stop-Process -Id (Get-Process | ? {$_.Name -eq "explorer"} | ? {$_.SI -eq (Get-Process -PID $PID).SessionId}).Id
+Start explorer.exe
+
+
+
+# Check if OneDrive installed
+$OneDriveRegistryPath = "HKCU:\SOFTWARE\Microsoft\OneDrive\Accounts\Business1"
+
+IF((Test-Path $OneDriveRegistryPath))
+{
+    # Get users OneDrive For Business local directory location from registry
+    $OneDriveLocation = Get-ItemPropertyValue $OneDriveRegistryPath -Name UserFolder
+
+    # Define locations where User and Shared Templates are to be moved to
+    $OfficeUserTemplateDir = "$($OneDriveLocation)\AppData\Roaming\Microsoft\Templates"
+    $OfficeSharedTemplateDir = "C:\Users\$($env:username)\Private Equity Recruitment Ltd\PER Templates - Documents\pertemplates"
+
+    # Define default local Word Startup folder location and PER_Global.dotm SharePoint location 
+    $WordStartupDir = "C:\Users\$($env:username)\AppData\Roaming\Microsoft\Word\STARTUP"
+    $PERglobalDir = "C:\Users\$($env:username)\Private Equity Recruitment Ltd\PER Templates - Documents\perglobal"
+
+    # Check if Office User Template folder has been created on OneDrive
+    If (!(Test-Path $OfficeUserTemplateDir))
+    {
+        # Create OneDrive User Template directory structure
+        New-Item $OfficeUserTemplateDir -ItemType directory | Out-Null
+        # Set AppData folder to be hidden
+        #$(Get-Item "$($OneDriveLocation)\AppData").Attributes = "Hidden"
+
+        # Copy normalemail.dotm and normal.dotm files to new directory if they exist
+        $DefaultOfficeUserTemplateDir = "C:\Users\$($env:username)\AppData\Roaming\Microsoft\Templates"
+        If (Test-Path "$($DefaultOfficeUserTemplateDir)\Normal.dotm")
+        {
+            Copy-Item -Path "$($DefaultOfficeUserTemplateDir)\Normal.dotm" -Destination $OfficeUserTemplateDir -ErrorAction Continue
+        }
+        If (Test-Path "$($DefaultOfficeUserTemplateDir)\NormalEmail.dotm")
+        {
+            Copy-Item -Path "$($DefaultOfficeUserTemplateDir)\NormalEmail.dotm" -Destination $OfficeUserTemplateDir -ErrorAction Continue
+        }
+    }
+
+    # Check if Office User Template file location defined
+    $TemplateRegistryPath = "HKCU:\SOFTWARE\Microsoft\Office\16.0\Common\General"
+    $Name = "UserTemplates"
+
+if(-not (Test-Path $TemplateRegistryPath))
+{
+    New-Item -path $TemplateRegistryPath -Force
+    New-ItemProperty -Path $TemplateRegistryPath -Name $Name -Value $OfficeUserTemplateDir -PropertyType ExpandString -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $TemplateRegistryPath -Name $Name -Value $OfficeUserTemplateDir -PropertyType ExpandString -Force
+}
+
+    $UserTemplatesRegValue = (get-item -Path $TemplateRegistryPath).GetValue("UserTemplates")
+
+
+    # Check if Office Shared Template file location defined
+
+    $Name = "SharedTemplates"
+    if(-not (Test-Path $TemplateRegistryPath))
+{
+    New-Item -path $TemplateRegistryPath -Force
+    New-ItemProperty -Path $TemplateRegistryPath -Name $Name -Value $OfficeSharedTemplateDir -PropertyType ExpandString -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $TemplateRegistryPath -Name $Name -Value $OfficeSharedTemplateDir -PropertyType ExpandString -Force
+}
+
+    $SharedTemplatesRegValue = (get-item -Path $TemplateRegistryPath).GetValue("SharedTemplates")
+
+
+    # Check if Word Startup location has been changed to something other than the default location 
+    $WordStartupRegPath = "HKCU:\SOFTWARE\Microsoft\Office\16.0\Word\Options"
+    $WordStartupDir = "C:\Users\$($env:username)\AppData\Roaming\Microsoft\Word\STARTUP"
+        $Name = "STARTUP-PATH"
+    if(-not (Test-Path $WordStartupRegPath))
+{
+    New-Item -path $WordStartupRegPath -Force
+    New-ItemProperty -Path $WordStartupRegPath -Name $Name -Value $WordStartupDir -PropertyType ExpandString -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $WordStartupRegPath -Name $Name -Value $WordStartupDir -PropertyType ExpandString -Force
+}
+
+
+    # Copy PER_Global.dotm to local Word STARTUP folder
+   $globalcopied = "HKCU:\SOFTWARE\Microsoft\Office\16.0\Word\GlobalTemplate"
+   
+   if(-not (Test-Path $globalcopied))
+   {
+    If (-not (Test-Path $PERglobalDir))
+      
+      {
+       DO
+    {
+		Start-Sleep -Seconds 1
+
+        }
+        Until (Test-Path $PERglobalDir)
+        }
+If (-not (Test-Path $WordStartupDir))
+{
+New-Item -Path "C:\Users\$($env:username)\AppData\Roaming\Microsoft\" -Name "Word" -ItemType "directory"
+New-Item -Path "C:\Users\$($env:username)\AppData\Roaming\Microsoft\Word" -Name "STARTUP" -ItemType "directory"
+}
+    If ((Test-Path $PERglobalDir) -and (Test-Path $WordStartupDir))
+    {
+        Invoke-Expression -Command "robocopy '$($PERglobalDir)' '$($WordStartupDir)' /R:0 /W:0 /XO" | Out-Null
+
+        "Copied File"
+
+        New-Item -path $globalcopied -Force
+    }
+    Else{
+    "Didn't copy file"
+    }
+    }
+
+    Else
+    {
+    "No need to copy"
+    }
+}
+
+
+# Map remaining OneDrive sites
+  If((Test-Path $OneDrivePath))     
+   {
+    $path = "C:\Users\$($env:username)\Private Equity Recruitment Ltd\X Docs - Documents"
+    if(-not (Test-Path $path))
+    {		start $XDocs
+    DO
+    {
+            Start-Sleep -Seconds 1
+
+        }
+        Until (Test-Path $path)
+    }
+
+    $path = "C:\Users\$($env:username)\Private Equity Recruitment Ltd\Y Docs - Documents"
+    if(-not (Test-Path $path))
+    {		start $YDocs
+    DO
+    {
+            Start-Sleep -Seconds 1
+
+        }
+        Until (Test-Path $path)
+    }
+
+        $path = "C:\Users\$($env:username)\Private Equity Recruitment Ltd\Asia - Documents"
+    if(-not (Test-Path $path))
+    {		start $Asia
+    DO
+    {
+            Start-Sleep -Seconds 1
+
+        }
+        Until (Test-Path $path)
+    }   
+    
+    $path = "C:\Users\$($env:username)\Private Equity Recruitment Ltd\LatAm - Documents"
+    if(-not (Test-Path $path))
+    {		start $LatAm
+    DO
+    {
+        Start-Sleep -Seconds 1
+
+        }
+        Until (Test-Path $path)
+    } 
+    }
+
+    $path = "C:\Program Files (x86)\CloudCall\CloudCall Communicator\cloudcall_communicator.exe"
+    if(Test-Path $path)
+
+
+    { Start 'C:\Program Files (x86)\CloudCall\CloudCall Communicator\cloudcall_communicator.exe'}
+    ELSE
+    {    $path = "C:\Program Files (x86)\CloudCall\Communicator\communicator.exe"
+         if(Test-Path $path)
+         { Start 'C:\Program Files (x86)\CloudCall\Communicator\communicator.exe'}
+         }
+         
+    
+$shell = New-Object -ComObject Shell.Application
+$shell.minimizeall()
+start-sleep 1
+$wsh = New-Object -ComObject Wscript.Shell
+$wsh.sendkeys('{F5}')
+start-sleep 1
+$shell.undominimizeall()
+
+
+$Name = "Provisioning Complete"
+$value = "1"
+if(-not (Test-Path $FirstRun))
+{
+    New-Item -path $FirstRun -Force
+    New-ItemProperty -Path $FirstRun -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $FirstRun -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+
+
+}   
+
+ELSE
+{
+
+$Name = "Provisioning Complete"
+$value = "1"
+if(-not (Test-Path $FirstRun))
+{
+    New-Item -path $FirstRun -Force
+    New-ItemProperty -Path $FirstRun -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $FirstRun -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+
+"PER Account - not provisioned"
+
+exit
+}
+
+}
+
+
+Else{
+
+"Provisioning previously completed"}
+exit
+}
+
+
