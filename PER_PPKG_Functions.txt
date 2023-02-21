@@ -107,24 +107,38 @@ Function Update-Windows {
 
 Function Registry-InitialSetup {
 
+$Path = $User =   if((Test-Path "C:\Users"))
+          {     "Users"
+  	  }
+  	  if((Test-Path "C:\Benutzer"))
+ 	  {     "Benutzer"
+  	  }
+  	  if((Test-Path "C:\Usarios"))
+  	  {     "Usarios"
+  	  }
+  	  if((Test-Path "C:\Utilisateurs"))
+  	  {     "Utilisateurs"
+  	  }
+
+
 ##Copy Start Menu & Taskbar Layout
-Copy-Item -Path "C:\IT\PPKG\LayoutModification.xml" -Destination "C:\Users\Default\AppData\Local\Microsoft\Windows\Shell"
+Copy-Item -Path "C:\IT\PPKG\LayoutModification.xml" -Destination "C:\"+$User+"\Default\AppData\Local\Microsoft\Windows\Shell"
 
 ##Copy Task Script & Batch File
-if(-not(Test-Path("C:\Users\Public\Provisioning")))
+if(-not(Test-Path("C:\IT\UAP")))
 {
-New-Item -Path "C:\Users\Public\" -Name "Provisioning" -ItemType "directory" -Force
-Copy-Item -Path "C:\IT\PPKG\UserProvisioning.bat" -Destination "C:\Users\Public\Provisioning\UserProvisioning.bat" -Force
-Copy-Item -Path "C:\IT\PPKG\UserProvisioning.ps1" -Destination "C:\Users\Public\Provisioning\UserProvisioning.ps1" -Force
+New-Item -Path "C:\IT\" -Name "UAP" -ItemType "directory" -Force
+Copy-Item -Path "C:\IT\PPKG\UserProvisioning.bat" -Destination "C:\IT\UAP\UserProvisioning.bat" -Force
+Copy-Item -Path "C:\IT\PPKG\UserProvisioning.ps1" -Destination "C:\IT\UAP\UserProvisioning.ps1" -Force
 }
 Else{
-Copy-Item -Path "C:\IT\PPKG\UserProvisioning.bat" -Destination "C:\Users\Public\Provisioning\UserProvisioning.bat" -Force
-Copy-Item -Path "C:\IT\PPKG\UserProvisioning.ps1" -Destination "C:\Users\Public\Provisioning\UserProvisioning.ps1" -Force
+Copy-Item -Path "C:\IT\PPKG\UserProvisioning.bat" -Destination "C:\IT\UAP\UserProvisioning.bat" -Force
+Copy-Item -Path "C:\IT\PPKG\UserProvisioning.ps1" -Destination "C:\IT\UAP\UserProvisioning.ps1" -Force
 }
 
 ##Create Tasks Triggered @ User Login
 $triggerMain = New-ScheduledTaskTrigger -atlogon
-$actionMain = New-ScheduledTaskAction -Execute "C:\Users\Public\Provisioning\UserProvisioning.bat"
+$actionMain = New-ScheduledTaskAction -Execute "C:\IT\UAP\UserProvisioning.bat"
 $Tasksettings = New-ScheduledTaskSettingsSet -DontStopIfGoingOnBatteries -AllowStartIfOnBatteries
 $Principal = New-ScheduledTaskPrincipal -GroupId "BUILTIN\USERS"
 
