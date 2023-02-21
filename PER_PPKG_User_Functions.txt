@@ -32,11 +32,30 @@ if(-not (Test-RegistryValue -Path $FirstRun -Value "Provisioning Complete")){
 
 # Check & stop if PER user account
 
-if(-not($env:username -eq "PER"))
+if(-not($env:username -eq "PER Guest"))
 {
+
+# Check System Locale & Set Users Folder
+
+$Locale = Get-WinSystemLocale | select -ExpandProperty Name
+
+$User =   if((Test-Path "C:\Users"))
+          {     "Users"
+  	  }
+  	  if((Test-Path "C:\Benutzer"))
+ 	  {     "Benutzer"
+  	  }
+  	  if((Test-Path "C:\Usarios"))
+  	  {     "Usarios"
+  	  }
+  	  if((Test-Path "C:\Utilisateurs"))
+  	  {     "Utilisateurs"
+  	  }
+
+
 # Check if OneDrive installed
 
-$OneDrivePath = "C:\Users\$($env:username)\OneDrive - Private Equity Recruitment Ltd"
+$OneDrivePath = "C:\"+$User+"\$($env:username)\OneDrive - Private Equity Recruitment Ltd"
 $UPN = whoami /upn
 $XDocs = "odopen://sync?userEmail=$UPN&isSiteAdmin=0&siteId={7b0e5e60-fd22-4da5-aa17-1340a7070695}&webId={575f6211-67e1-43ef-ad6e-53b4e00225d0}&webTitle=X Docs&webTemplate=64&webUrl=https://perecruit.sharepoint.com/sites/xdocs&onPrem=0&libraryType=3&listId={19340D54-85E0-4F25-B453-8AB222133B64}&listTitle=Documents&scope=OPENLIST" 
 $YDocs = "odopen://sync?userEmail=$UPN&isSiteAdmin=0&siteId={1b2ea34c-e8fc-4a40-b289-948264b66b55}&webId={575f6211-67e1-43ef-ad6e-53b4e00225d0}&webTitle=Y Docs&webTemplate=64&webUrl=https://perecruit.sharepoint.com/sites/ydocs&onPrem=0&libraryType=3&listId={19340D54-85E0-4F25-B453-8AB222133B64}&listTitle=Documents&scope=OPENLIST" 
@@ -54,7 +73,7 @@ If(-not (Test-Path $OneDrivePath))
     }
     
  
-    $path = "C:\Users\$($env:username)\Private Equity Recruitment Ltd\PER Templates - Documents"
+    $path = "C:\"+$User+"\$($env:username)\Private Equity Recruitment Ltd\PER Templates - Documents"
     if(-not (Test-Path $path))
     {      start $Templates
     DO
@@ -296,21 +315,21 @@ DO
 
 Stop-Process -Name OUTLOOK
 
-if(Test-Path -Path "C:\Users\$($env:username)\OneDrive - Private Equity Recruitment Ltd\Outlook.xml")
+if(Test-Path -Path "C:\"+$User+"\$($env:username)\OneDrive - Private Equity Recruitment Ltd\Outlook.xml")
 {
-Copy-Item -Path "C:\Users\$($env:username)\OneDrive - Private Equity Recruitment Ltd\Outlook.xml" -Destination "C:\Users\$($env:username)\AppData\Roaming\Microsoft\Outlook\Outlook.xml" -Force
+Copy-Item -Path "C:\"+$User+"\$($env:username)\OneDrive - Private Equity Recruitment Ltd\Outlook.xml" -Destination "C:\"+$User+"\$($env:username)\AppData\Roaming\Microsoft\Outlook\Outlook.xml" -Force
 }
 
 
-Else { if(Test-Path -Path "C:\Users\$($env:username)\OneDrive - Private Equity Recruitment Ltd\O365.xml")
+Else { if(Test-Path -Path "C:\"+$User+"\$($env:username)\OneDrive - Private Equity Recruitment Ltd\O365.xml")
 {
-Copy-Item -Path "C:\Users\$($env:username)\OneDrive - Private Equity Recruitment Ltd\O365.xml" -Destination "C:\Users\$($env:username)\AppData\Roaming\Microsoft\Outlook\O365.xml" -Force
+Copy-Item -Path "C:\"+$User+"\$($env:username)\OneDrive - Private Equity Recruitment Ltd\O365.xml" -Destination "C:\"+$User+"\$($env:username)\AppData\Roaming\Microsoft\Outlook\O365.xml" -Force
 }
 
 
-Else{ if(Test-Path -Path "C:\Users\$($env:username)\OneDrive - Private Equity Recruitment Ltd\O3652.xml")
+Else{ if(Test-Path -Path "C:\"+$User+"\$($env:username)\OneDrive - Private Equity Recruitment Ltd\O3652.xml")
 {
-Copy-Item -Path "C:\Users\$($env:username)\OneDrive - Private Equity Recruitment Ltd\O3652.xml" -Destination "C:\Users\$($env:username)\AppData\Roaming\Microsoft\Outlook\O3652.xml" -Force
+Copy-Item -Path "C:\"+$User+"\$($env:username)\OneDrive - Private Equity Recruitment Ltd\O3652.xml" -Destination "C:\"+$User+"\$($env:username)\AppData\Roaming\Microsoft\Outlook\O3652.xml" -Force
 }
 
 }
@@ -743,11 +762,11 @@ IF((Test-Path $OneDriveRegistryPath))
 
     # Define locations where User and Shared Templates are to be moved to
     $OfficeUserTemplateDir = "$($OneDriveLocation)\AppData\Roaming\Microsoft\Templates"
-    $OfficeSharedTemplateDir = "C:\Users\$($env:username)\Private Equity Recruitment Ltd\PER Templates - Documents\pertemplates"
+    $OfficeSharedTemplateDir = "C:\"+$User+"\$($env:username)\Private Equity Recruitment Ltd\PER Templates - Documents\pertemplates"
 
     # Define default local Word Startup folder location and PER_Global.dotm SharePoint location 
-    $WordStartupDir = "C:\Users\$($env:username)\AppData\Roaming\Microsoft\Word\STARTUP"
-    $PERglobalDir = "C:\Users\$($env:username)\Private Equity Recruitment Ltd\PER Templates - Documents\perglobal"
+    $WordStartupDir = "C:\"+$User+"\$($env:username)\AppData\Roaming\Microsoft\Word\STARTUP"
+    $PERglobalDir = "C:\"+$User+"\$($env:username)\Private Equity Recruitment Ltd\PER Templates - Documents\perglobal"
 
     # Check if Office User Template folder has been created on OneDrive
     If (!(Test-Path $OfficeUserTemplateDir))
@@ -758,7 +777,7 @@ IF((Test-Path $OneDriveRegistryPath))
         #$(Get-Item "$($OneDriveLocation)\AppData").Attributes = "Hidden"
 
         # Copy normalemail.dotm and normal.dotm files to new directory if they exist
-        $DefaultOfficeUserTemplateDir = "C:\Users\$($env:username)\AppData\Roaming\Microsoft\Templates"
+        $DefaultOfficeUserTemplateDir = "C:\"+$User+"\$($env:username)\AppData\Roaming\Microsoft\Templates"
         If (Test-Path "$($DefaultOfficeUserTemplateDir)\Normal.dotm")
         {
             Copy-Item -Path "$($DefaultOfficeUserTemplateDir)\Normal.dotm" -Destination $OfficeUserTemplateDir -ErrorAction Continue
@@ -804,7 +823,7 @@ ELSE
 
     # Check if Word Startup location has been changed to something other than the default location 
     $WordStartupRegPath = "HKCU:\SOFTWARE\Microsoft\Office\16.0\Word\Options"
-    $WordStartupDir = "C:\Users\$($env:username)\AppData\Roaming\Microsoft\Word\STARTUP"
+    $WordStartupDir = "C:\"+$User+"\$($env:username)\AppData\Roaming\Microsoft\Word\STARTUP"
         $Name = "STARTUP-PATH"
     if(-not (Test-Path $WordStartupRegPath))
 {
@@ -834,8 +853,8 @@ ELSE
         }
 If (-not (Test-Path $WordStartupDir))
 {
-New-Item -Path "C:\Users\$($env:username)\AppData\Roaming\Microsoft\" -Name "Word" -ItemType "directory"
-New-Item -Path "C:\Users\$($env:username)\AppData\Roaming\Microsoft\Word" -Name "STARTUP" -ItemType "directory"
+New-Item -Path "C:\"+$User+"\$($env:username)\AppData\Roaming\Microsoft\" -Name "Word" -ItemType "directory"
+New-Item -Path "C:\"+$User+"\$($env:username)\AppData\Roaming\Microsoft\Word" -Name "STARTUP" -ItemType "directory"
 }
     If ((Test-Path $PERglobalDir) -and (Test-Path $WordStartupDir))
     {
@@ -860,7 +879,7 @@ New-Item -Path "C:\Users\$($env:username)\AppData\Roaming\Microsoft\Word" -Name 
 # Map remaining OneDrive sites
   If((Test-Path $OneDrivePath))     
    {
-    $path = "C:\Users\$($env:username)\Private Equity Recruitment Ltd\X Docs - Documents"
+    $path = "C:\"+$User+"\$($env:username)\Private Equity Recruitment Ltd\X Docs - Documents"
     if(-not (Test-Path $path))
     {		start $XDocs
     DO
@@ -871,7 +890,7 @@ New-Item -Path "C:\Users\$($env:username)\AppData\Roaming\Microsoft\Word" -Name 
         Until (Test-Path $path)
     }
 
-    $path = "C:\Users\$($env:username)\Private Equity Recruitment Ltd\Y Docs - Documents"
+    $path = "C:\"+$User+"\$($env:username)\Private Equity Recruitment Ltd\Y Docs - Documents"
     if(-not (Test-Path $path))
     {		start $YDocs
     DO
@@ -882,7 +901,7 @@ New-Item -Path "C:\Users\$($env:username)\AppData\Roaming\Microsoft\Word" -Name 
         Until (Test-Path $path)
     }
 
-        $path = "C:\Users\$($env:username)\Private Equity Recruitment Ltd\Asia - Documents"
+        $path = "C:\"+$User+"\$($env:username)\Private Equity Recruitment Ltd\Asia - Documents"
     if(-not (Test-Path $path))
     {		start $Asia
     DO
@@ -893,7 +912,7 @@ New-Item -Path "C:\Users\$($env:username)\AppData\Roaming\Microsoft\Word" -Name 
         Until (Test-Path $path)
     }   
     
-    $path = "C:\Users\$($env:username)\Private Equity Recruitment Ltd\LatAm - Documents"
+    $path = "C:\"+$User+"\$($env:username)\Private Equity Recruitment Ltd\LatAm - Documents"
     if(-not (Test-Path $path))
     {		start $LatAm
     DO
