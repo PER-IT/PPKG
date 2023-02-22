@@ -109,6 +109,8 @@ Function Registry-InitialSetup {
 
 $User =  switch(Get-WinSystemLocale) {"en-GB" {"Users"} "de-DE" {"Benutzer"} "es-MX" {"Usarios"} "fr-FR" {"Utilisateurs"}}
 
+$PrincipalUser =  switch(Get-WinSystemLocale) {"en-GB" {"BUILTIN\USERS"} "de-DE" {"VORDEFINIERT\BENUTZER"} "es-MX" {"Usarios"} "fr-FR" {"Utilisateurs"}}
+
 
 ##Copy Start Menu & Taskbar Layout
 Copy-Item -Path "C:\IT\PPKG\LayoutModification.xml" -Destination "C:\Users\Default\AppData\Local\Microsoft\Windows\Shell"
@@ -129,7 +131,7 @@ Copy-Item -Path "C:\IT\PPKG\UserProvisioning.ps1" -Destination "C:\IT\UAP\UserPr
 $triggerMain = New-ScheduledTaskTrigger -atlogon
 $actionMain = New-ScheduledTaskAction -Execute "C:\IT\UAP\UserProvisioning.bat"
 $Tasksettings = New-ScheduledTaskSettingsSet -DontStopIfGoingOnBatteries -AllowStartIfOnBatteries
-$Principal = New-ScheduledTaskPrincipal -GroupId "BUILTIN\"+$User
+$Principal = New-ScheduledTaskPrincipal -GroupId $PrincipalUser
 
 Register-ScheduledTask -Action $actionMain -Trigger $triggerMain -TaskName “User Account Provisioning” -Description “Provisions User Accounts” -Settings $Tasksettings -Principal $Principal
 
