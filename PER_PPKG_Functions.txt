@@ -107,9 +107,9 @@ Function Update-Windows {
 
 Function Registry-InitialSetup {
 
-$User =  switch(Get-WinSystemLocale) {"en-GB" {"Users"} "de-DE" {"Benutzer"} "es-MX" {"Usarios"} "fr-FR" {"Utilisateurs"}}
+$User =  switch(Get-WinSystemLocale) {"en-GB" {"Users"} "en-US" {"Users"} "de-DE" {"Benutzer"} "es-MX" {"Usarios"} "fr-FR" {"Utilisateurs"}}
 
-$PrincipalUser =  switch(Get-WinSystemLocale) {"en-GB" {"BUILTIN\USERS"} "de-DE" {"VORDEFINIERT\BENUTZER"} "es-MX" {"Usarios"} "fr-FR" {"Utilisateurs"}}
+$PrincipalUser =  switch(Get-WinSystemLocale) {"en-GB" {"BUILTIN\USERS"} "en-US" {"BUILTIN\USERS"} "de-DE" {"VORDEFINIERT\BENUTZER"} "es-MX" {"Usarios"} "fr-FR" {"Utilisateurs"}}
 
 
 ##Copy Start Menu & Taskbar Layout
