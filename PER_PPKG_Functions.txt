@@ -107,11 +107,10 @@ Function Update-Windows {
 
 Function Registry-InitialSetup {
 
-$User =  switch(Get-WinSystemLocale) {"en-GB" {"Users"} "en-US" {"Users"} "de-DE" {"Benutzer"} "es-MX" {"Usarios"} "fr-FR" {"Utilisateurs"}}
-
-$PrincipalUser =  switch(Get-WinSystemLocale) {"en-GB" {"BUILTIN\USERS"} "en-US" {"BUILTIN\USERS"} "de-DE" {"VORDEFINIERT\BENUTZER"} "es-MX" {"Usarios"} "fr-FR" {"Utilisateurs"}}
-
-
+    $objSID = New-Object System.Security.Principal.SecurityIdentifier ("S-1-5-32-545")
+    $objUser = $objSID.Translate( [System.Security.Principal.NTAccount])
+    $PrincipalUser = $objUser.Value
+    
 ##Copy Start Menu & Taskbar Layout
 Copy-Item -Path "C:\IT\PPKG\LayoutModification.xml" -Destination "C:\Users\Default\AppData\Local\Microsoft\Windows\Shell"
 
