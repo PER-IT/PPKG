@@ -48,7 +48,7 @@ if(-not($env:username -eq "PER Guest"))
 
 # Check if OneDrive installed
 
-$OneDrivePath = "C:\$($User)\$($env:username)\OneDrive - Private Equity Recruitment Ltd"
+$OneDrivePath = "C:\Users\$($env:username)\OneDrive - Private Equity Recruitment Ltd"
 $UPN = whoami /upn
 $XDocs = "odopen://sync?userEmail=$UPN&isSiteAdmin=0&siteId={7b0e5e60-fd22-4da5-aa17-1340a7070695}&webId={575f6211-67e1-43ef-ad6e-53b4e00225d0}&webTitle=X Docs&webTemplate=64&webUrl=https://perecruit.sharepoint.com/sites/xdocs&onPrem=0&libraryType=3&listId={19340D54-85E0-4F25-B453-8AB222133B64}&listTitle=Documents&scope=OPENLIST" 
 $YDocs = "odopen://sync?userEmail=$UPN&isSiteAdmin=0&siteId={1b2ea34c-e8fc-4a40-b289-948264b66b55}&webId={575f6211-67e1-43ef-ad6e-53b4e00225d0}&webTitle=Y Docs&webTemplate=64&webUrl=https://perecruit.sharepoint.com/sites/ydocs&onPrem=0&libraryType=3&listId={19340D54-85E0-4F25-B453-8AB222133B64}&listTitle=Documents&scope=OPENLIST" 
