@@ -37,25 +37,12 @@ if(-not($env:username -eq "PER Guest"))
 
 # Check System Locale & Set Users Folder
 
-$Locale = Get-WinSystemLocale | select -ExpandProperty Name
-
-$User =   if((Test-Path "C:\Users"))
-          {     "Users"
-  	  }
-  	  if((Test-Path "C:\Benutzer"))
- 	  {     "Benutzer"
-  	  }
-  	  if((Test-Path "C:\Usarios"))
-  	  {     "Usarios"
-  	  }
-  	  if((Test-Path "C:\Utilisateurs"))
-  	  {     "Utilisateurs"
-  	  }
+$User = switch(Get-WinSystemLocale) {"en-GB" {"Users"} "en-US" {"Users"} "de-DE" {"Benutzer"} "es-MX" {"Usarios"} "fr-FR" {"Utilisateurs"}}
 
 
 # Check if OneDrive installed
 
-$OneDrivePath = "C:\"+$User+"\$($env:username)\OneDrive - Private Equity Recruitment Ltd"
+$OneDrivePath = "C:\$($User)\$($env:username)\OneDrive - Private Equity Recruitment Ltd"
 $UPN = whoami /upn
 $XDocs = "odopen://sync?userEmail=$UPN&isSiteAdmin=0&siteId={7b0e5e60-fd22-4da5-aa17-1340a7070695}&webId={575f6211-67e1-43ef-ad6e-53b4e00225d0}&webTitle=X Docs&webTemplate=64&webUrl=https://perecruit.sharepoint.com/sites/xdocs&onPrem=0&libraryType=3&listId={19340D54-85E0-4F25-B453-8AB222133B64}&listTitle=Documents&scope=OPENLIST" 
 $YDocs = "odopen://sync?userEmail=$UPN&isSiteAdmin=0&siteId={1b2ea34c-e8fc-4a40-b289-948264b66b55}&webId={575f6211-67e1-43ef-ad6e-53b4e00225d0}&webTitle=Y Docs&webTemplate=64&webUrl=https://perecruit.sharepoint.com/sites/ydocs&onPrem=0&libraryType=3&listId={19340D54-85E0-4F25-B453-8AB222133B64}&listTitle=Documents&scope=OPENLIST" 
@@ -73,9 +60,9 @@ If(-not (Test-Path $OneDrivePath))
     }
     
  
-    $path = "C:\"+$User+"\$($env:username)\Private Equity Recruitment Ltd\PER Templates - Documents"
+    $path = "C:\$($User)\$($env:username)\Private Equity Recruitment Ltd\PER Templates - Documents"
     if(-not (Test-Path $path))
-    {      start $Templates
+    {      Start-Process $Templates
     DO
     {
 		Start-Sleep -Seconds 1
@@ -315,21 +302,21 @@ DO
 
 Stop-Process -Name OUTLOOK
 
-if(Test-Path -Path "C:\"+$User+"\$($env:username)\OneDrive - Private Equity Recruitment Ltd\Outlook.xml")
+if(Test-Path -Path "C:\$($User)\$($env:username)\OneDrive - Private Equity Recruitment Ltd\Outlook.xml")
 {
-Copy-Item -Path "C:\"+$User+"\$($env:username)\OneDrive - Private Equity Recruitment Ltd\Outlook.xml" -Destination "C:\"+$User+"\$($env:username)\AppData\Roaming\Microsoft\Outlook\Outlook.xml" -Force
+Copy-Item -Path "C:\$($User)\$($env:username)\OneDrive - Private Equity Recruitment Ltd\Outlook.xml" -Destination "C:\$($User)\$($env:username)\AppData\Roaming\Microsoft\Outlook\Outlook.xml" -Force
 }
 
 
-Else { if(Test-Path -Path "C:\"+$User+"\$($env:username)\OneDrive - Private Equity Recruitment Ltd\O365.xml")
+Else { if(Test-Path -Path "C:\$($User)\$($env:username)\OneDrive - Private Equity Recruitment Ltd\O365.xml")
 {
-Copy-Item -Path "C:\"+$User+"\$($env:username)\OneDrive - Private Equity Recruitment Ltd\O365.xml" -Destination "C:\"+$User+"\$($env:username)\AppData\Roaming\Microsoft\Outlook\O365.xml" -Force
+Copy-Item -Path "C:\$($User)\$($env:username)\OneDrive - Private Equity Recruitment Ltd\O365.xml" -Destination "C:\$($User)\$($env:username)\AppData\Roaming\Microsoft\Outlook\O365.xml" -Force
 }
 
 
-Else{ if(Test-Path -Path "C:\"+$User+"\$($env:username)\OneDrive - Private Equity Recruitment Ltd\O3652.xml")
+Else{ if(Test-Path -Path "C:\$($User)\$($env:username)\OneDrive - Private Equity Recruitment Ltd\O3652.xml")
 {
-Copy-Item -Path "C:\"+$User+"\$($env:username)\OneDrive - Private Equity Recruitment Ltd\O3652.xml" -Destination "C:\"+$User+"\$($env:username)\AppData\Roaming\Microsoft\Outlook\O3652.xml" -Force
+Copy-Item -Path "C:\$($User)\$($env:username)\OneDrive - Private Equity Recruitment Ltd\O3652.xml" -Destination "C:\$($User)\$($env:username)\AppData\Roaming\Microsoft\Outlook\O3652.xml" -Force
 }
 
 }
@@ -600,7 +587,7 @@ $registryPath = "HKCU:\Software\Microsoft\Office\16.0\Common\MailSettings"
 $Name = "MarkCommentsWith"
 $YourInput ="57,00,69,00,6c,00,6c,00,69,00,61,00,6d,00,20,00,54,00,6f,00,6d,00,6c,00,69,00,6e,00,73,00,6f,00,6e,00,00,00"
 
-$value = $YourInput.Split(',') | % { "0x$_"}
+$value = $YourInput.Split(',') | ForEach-Object { "0x$_"}
 if(-not (Test-Path $registryPath))
 {
     New-Item -path $registryPath -Force
@@ -615,7 +602,7 @@ $registryPath = "HKCU:\Software\Microsoft\Office\16.0\Common\MailSettings"
 $Name = "ComposeFontComplex"
 $YourInput ="3c,68,74,6d,6c,3e,0d,0a,0d,0a,3c,68,65,61,64,3e,0d,0a,3c,73,74,79,6c,65,3e,0d,0a,0d,0a,20,2f,2a,20,53,74,79,6c,65,20,44,65,66,69,6e,69,74,69,6f,6e,73,20,2a,2f,0d,0a,20,73,70,61,6e,2e,50,65,72,73,6f,6e,61,6c,43,6f,6d,70,6f,73,65,53,74,79,6c,65,0d,0a,09,7b,6d,73,6f,2d,73,74,79,6c,65,2d,6e,61,6d,65,3a,22,50,65,72,73,6f,6e,61,6c,20,43,6f,6d,70,6f,73,65,20,53,74,79,6c,65,22,3b,0d,0a,09,6d,73,6f,2d,73,74,79,6c,65,2d,74,79,70,65,3a,70,65,72,73,6f,6e,61,6c,2d,63,6f,6d,70,6f,73,65,3b,0d,0a,09,6d,73,6f,2d,73,74,79,6c,65,2d,6e,6f,73,68,6f,77,3a,79,65,73,3b,0d,0a,09,6d,73,6f,2d,73,74,79,6c,65,2d,75,6e,68,69,64,65,3a,6e,6f,3b,0d,0a,09,6d,73,6f,2d,61,6e,73,69,2d,66,6f,6e,74,2d,73,69,7a,65,3a,31,31,2e,30,70,74,3b,0d,0a,09,6d,73,6f,2d,62,69,64,69,2d,66,6f,6e,74,2d,73,69,7a,65,3a,31,31,2e,30,70,74,3b,0d,0a,09,66,6f,6e,74,2d,66,61,6d,69,6c,79,3a,22,43,61,6c,69,62,72,69,22,2c,73,61,6e,73,2d,73,65,72,69,66,3b,0d,0a,09,6d,73,6f,2d,61,73,63,69,69,2d,66,6f,6e,74,2d,66,61,6d,69,6c,79,3a,43,61,6c,69,62,72,69,3b,0d,0a,09,6d,73,6f,2d,61,73,63,69,69,2d,74,68,65,6d,65,2d,66,6f,6e,74,3a,6d,69,6e,6f,72,2d,6c,61,74,69,6e,3b,0d,0a,09,6d,73,6f,2d,68,61,6e,73,69,2d,66,6f,6e,74,2d,66,61,6d,69,6c,79,3a,43,61,6c,69,62,72,69,3b,0d,0a,09,6d,73,6f,2d,68,61,6e,73,69,2d,74,68,65,6d,65,2d,66,6f,6e,74,3a,6d,69,6e,6f,72,2d,6c,61,74,69,6e,3b,0d,0a,09,6d,73,6f,2d,62,69,64,69,2d,66,6f,6e,74,2d,66,61,6d,69,6c,79,3a,22,54,69,6d,65,73,20,4e,65,77,20,52,6f,6d,61,6e,22,3b,0d,0a,09,6d,73,6f,2d,62,69,64,69,2d,74,68,65,6d,65,2d,66,6f,6e,74,3a,6d,69,6e,6f,72,2d,62,69,64,69,3b,0d,0a,09,63,6f,6c,6f,72,3a,23,35,39,35,39,35,39,3b,0d,0a,09,6d,73,6f,2d,74,68,65,6d,65,63,6f,6c,6f,72,3a,74,65,78,74,31,3b,0d,0a,09,6d,73,6f,2d,74,68,65,6d,65,74,69,6e,74,3a,31,36,36,3b,7d,0d,0a,2d,2d,3e,0d,0a,3c,2f,73,74,79,6c,65,3e,0d,0a,3c,2f,68,65,61,64,3e,0d,0a,0d,0a,3c,2f,68,74,6d,6c,3e,0d,0a"
 
-$value = $YourInput.Split(',') | % { "0x$_"}
+$value = $YourInput.Split(',') | ForEach-Object { "0x$_"}
 if(-not (Test-Path $registryPath))
 {
     New-Item -path $registryPath -Force
@@ -630,7 +617,7 @@ $registryPath = "HKCU:\Software\Microsoft\Office\16.0\Common\MailSettings"
 $Name = "ComposeFontSimple"
 $YourInput ="3c,00,00,00,1f,00,00,f8,00,00,00,00,dc,00,00,00,00,00,00,00,a6,ff,00,dd,00,22,43,61,6c,69,62,72,69,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00"
 
-$value = $YourInput.Split(',') | % { "0x$_"}
+$value = $YourInput.Split(',') | ForEach-Object { "0x$_"}
 if(-not (Test-Path $registryPath))
 {
     New-Item -path $registryPath -Force
@@ -645,7 +632,7 @@ $registryPath = "HKCU:\Software\Microsoft\Office\16.0\Common\MailSettings"
 $Name = "ReplyFontComplex"
 $YourInput ="3c,68,74,6d,6c,3e,0d,0a,0d,0a,3c,68,65,61,64,3e,0d,0a,3c,73,74,79,6c,65,3e,0d,0a,0d,0a,20,2f,2a,20,53,74,79,6c,65,20,44,65,66,69,6e,69,74,69,6f,6e,73,20,2a,2f,0d,0a,20,73,70,61,6e,2e,50,65,72,73,6f,6e,61,6c,52,65,70,6c,79,53,74,79,6c,65,0d,0a,09,7b,6d,73,6f,2d,73,74,79,6c,65,2d,6e,61,6d,65,3a,22,50,65,72,73,6f,6e,61,6c,20,52,65,70,6c,79,20,53,74,79,6c,65,22,3b,0d,0a,09,6d,73,6f,2d,73,74,79,6c,65,2d,74,79,70,65,3a,70,65,72,73,6f,6e,61,6c,2d,72,65,70,6c,79,3b,0d,0a,09,6d,73,6f,2d,73,74,79,6c,65,2d,6e,6f,73,68,6f,77,3a,79,65,73,3b,0d,0a,09,6d,73,6f,2d,73,74,79,6c,65,2d,75,6e,68,69,64,65,3a,6e,6f,3b,0d,0a,09,6d,73,6f,2d,61,6e,73,69,2d,66,6f,6e,74,2d,73,69,7a,65,3a,31,31,2e,30,70,74,3b,0d,0a,09,6d,73,6f,2d,62,69,64,69,2d,66,6f,6e,74,2d,73,69,7a,65,3a,31,31,2e,30,70,74,3b,0d,0a,09,66,6f,6e,74,2d,66,61,6d,69,6c,79,3a,22,43,61,6c,69,62,72,69,22,2c,73,61,6e,73,2d,73,65,72,69,66,3b,0d,0a,09,6d,73,6f,2d,61,73,63,69,69,2d,66,6f,6e,74,2d,66,61,6d,69,6c,79,3a,43,61,6c,69,62,72,69,3b,0d,0a,09,6d,73,6f,2d,61,73,63,69,69,2d,74,68,65,6d,65,2d,66,6f,6e,74,3a,6d,69,6e,6f,72,2d,6c,61,74,69,6e,3b,0d,0a,09,6d,73,6f,2d,68,61,6e,73,69,2d,66,6f,6e,74,2d,66,61,6d,69,6c,79,3a,43,61,6c,69,62,72,69,3b,0d,0a,09,6d,73,6f,2d,68,61,6e,73,69,2d,74,68,65,6d,65,2d,66,6f,6e,74,3a,6d,69,6e,6f,72,2d,6c,61,74,69,6e,3b,0d,0a,09,6d,73,6f,2d,62,69,64,69,2d,66,6f,6e,74,2d,66,61,6d,69,6c,79,3a,22,54,69,6d,65,73,20,4e,65,77,20,52,6f,6d,61,6e,22,3b,0d,0a,09,6d,73,6f,2d,62,69,64,69,2d,74,68,65,6d,65,2d,66,6f,6e,74,3a,6d,69,6e,6f,72,2d,62,69,64,69,3b,0d,0a,09,63,6f,6c,6f,72,3a,23,35,39,35,39,35,39,3b,0d,0a,09,6d,73,6f,2d,74,68,65,6d,65,63,6f,6c,6f,72,3a,74,65,78,74,31,3b,0d,0a,09,6d,73,6f,2d,74,68,65,6d,65,74,69,6e,74,3a,31,36,36,3b,7d,0d,0a,2d,2d,3e,0d,0a,3c,2f,73,74,79,6c,65,3e,0d,0a,3c,2f,68,65,61,64,3e,0d,0a,0d,0a,3c,2f,68,74,6d,6c,3e,0d,0a"
 
-$value = $YourInput.Split(',') | % { "0x$_"}
+$value = $YourInput.Split(',') | ForEach-Object { "0x$_"}
 if(-not (Test-Path $registryPath))
 {
     New-Item -path $registryPath -Force
@@ -660,7 +647,7 @@ $registryPath = "HKCU:\Software\Microsoft\Office\16.0\Common\MailSettings"
 $Name = "ReplyFontSimple"
 $YourInput ="3c,00,00,00,1f,00,00,f8,00,00,00,00,dc,00,00,00,00,00,00,00,a6,ff,00,dd,00,22,43,61,6c,69,62,72,69,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00"
 
-$value = $YourInput.Split(',') | % { "0x$_"}
+$value = $YourInput.Split(',') | ForEach-Object { "0x$_"}
 if(-not (Test-Path $registryPath))
 {
     New-Item -path $registryPath -Force
@@ -675,7 +662,7 @@ $registryPath = "HKCU:\Software\Microsoft\Office\16.0\Common\MailSettings"
 $Name = "TextFontComplex"
 $YourInput ="3c,68,74,6d,6c,3e,0d,0a,0d,0a,3c,68,65,61,64,3e,0d,0a,3c,73,74,79,6c,65,3e,0d,0a,0d,0a,20,2f,2a,20,53,74,79,6c,65,20,44,65,66,69,6e,69,74,69,6f,6e,73,20,2a,2f,0d,0a,20,70,2e,4d,73,6f,50,6c,61,69,6e,54,65,78,74,2c,20,6c,69,2e,4d,73,6f,50,6c,61,69,6e,54,65,78,74,2c,20,64,69,76,2e,4d,73,6f,50,6c,61,69,6e,54,65,78,74,0d,0a,09,7b,6d,73,6f,2d,73,74,79,6c,65,2d,6e,6f,73,68,6f,77,3a,79,65,73,3b,0d,0a,09,6d,73,6f,2d,73,74,79,6c,65,2d,70,72,69,6f,72,69,74,79,3a,39,39,3b,0d,0a,09,6d,73,6f,2d,73,74,79,6c,65,2d,6c,69,6e,6b,3a,22,50,6c,61,69,6e,20,54,65,78,74,20,43,68,61,72,22,3b,0d,0a,09,6d,61,72,67,69,6e,3a,30,63,6d,3b,0d,0a,09,6d,61,72,67,69,6e,2d,62,6f,74,74,6f,6d,3a,2e,30,30,30,31,70,74,3b,0d,0a,09,6d,73,6f,2d,70,61,67,69,6e,61,74,69,6f,6e,3a,77,69,64,6f,77,2d,6f,72,70,68,61,6e,3b,0d,0a,09,66,6f,6e,74,2d,73,69,7a,65,3a,31,31,2e,30,70,74,3b,0d,0a,09,6d,73,6f,2d,62,69,64,69,2d,66,6f,6e,74,2d,73,69,7a,65,3a,31,30,2e,35,70,74,3b,0d,0a,09,66,6f,6e,74,2d,66,61,6d,69,6c,79,3a,22,43,61,6c,69,62,72,69,22,2c,73,61,6e,73,2d,73,65,72,69,66,3b,0d,0a,09,6d,73,6f,2d,66,61,72,65,61,73,74,2d,66,6f,6e,74,2d,66,61,6d,69,6c,79,3a,43,61,6c,69,62,72,69,3b,0d,0a,09,6d,73,6f,2d,66,61,72,65,61,73,74,2d,74,68,65,6d,65,2d,66,6f,6e,74,3a,6d,69,6e,6f,72,2d,6c,61,74,69,6e,3b,0d,0a,09,6d,73,6f,2d,62,69,64,69,2d,66,6f,6e,74,2d,66,61,6d,69,6c,79,3a,22,54,69,6d,65,73,20,4e,65,77,20,52,6f,6d,61,6e,22,3b,0d,0a,09,6d,73,6f,2d,62,69,64,69,2d,74,68,65,6d,65,2d,66,6f,6e,74,3a,6d,69,6e,6f,72,2d,62,69,64,69,3b,0d,0a,09,63,6f,6c,6f,72,3a,23,35,39,35,39,35,39,3b,0d,0a,09,6d,73,6f,2d,74,68,65,6d,65,63,6f,6c,6f,72,3a,74,65,78,74,31,3b,0d,0a,09,6d,73,6f,2d,74,68,65,6d,65,74,69,6e,74,3a,31,36,36,3b,0d,0a,09,6d,73,6f,2d,66,61,72,65,61,73,74,2d,6c,61,6e,67,75,61,67,65,3a,45,4e,2d,55,53,3b,7d,0d,0a,2d,2d,3e,0d,0a,3c,2f,73,74,79,6c,65,3e,0d,0a,3c,2f,68,65,61,64,3e,0d,0a,0d,0a,3c,2f,68,74,6d,6c,3e,0d,0a"
 
-$value = $YourInput.Split(',') | % { "0x$_"}
+$value = $YourInput.Split(',') | ForEach-Object { "0x$_"}
 if(-not (Test-Path $registryPath))
 {
     New-Item -path $registryPath -Force
@@ -690,7 +677,7 @@ $registryPath = "HKCU:\Software\Microsoft\Office\16.0\Common\MailSettings"
 $Name = "TextFontSimple"
 $YourInput ="3c,00,00,00,1f,00,00,f8,00,00,00,00,dc,00,00,00,00,00,00,00,a6,ff,00,dd,00,22,43,61,6c,69,62,72,69,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00"
 
-$value = $YourInput.Split(',') | % { "0x$_"}
+$value = $YourInput.Split(',') | ForEach-Object { "0x$_"}
 if(-not (Test-Path $registryPath))
 {
     New-Item -path $registryPath -Force
@@ -747,8 +734,8 @@ ELSE
     New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
 }
 
-Stop-Process -Id (Get-Process | ? {$_.Name -eq "explorer"} | ? {$_.SI -eq (Get-Process -PID $PID).SessionId}).Id
-Start explorer.exe
+Stop-Process -Id (Get-Process | Where-Object {$_.Name -eq "explorer"} | Where-Object {$_.SI -eq (Get-Process -PID $PID).SessionId}).Id
+Start-Process explorer.exe
 
 
 
@@ -762,11 +749,11 @@ IF((Test-Path $OneDriveRegistryPath))
 
     # Define locations where User and Shared Templates are to be moved to
     $OfficeUserTemplateDir = "$($OneDriveLocation)\AppData\Roaming\Microsoft\Templates"
-    $OfficeSharedTemplateDir = "C:\"+$User+"\$($env:username)\Private Equity Recruitment Ltd\PER Templates - Documents\pertemplates"
+    $OfficeSharedTemplateDir = "C:\$($User)\$($env:username)\Private Equity Recruitment Ltd\PER Templates - Documents\pertemplates"
 
     # Define default local Word Startup folder location and PER_Global.dotm SharePoint location 
-    $WordStartupDir = "C:\"+$User+"\$($env:username)\AppData\Roaming\Microsoft\Word\STARTUP"
-    $PERglobalDir = "C:\"+$User+"\$($env:username)\Private Equity Recruitment Ltd\PER Templates - Documents\perglobal"
+    $WordStartupDir = "C:\$($User)\$($env:username)\AppData\Roaming\Microsoft\Word\STARTUP"
+    $PERglobalDir = "C:\$($User)\$($env:username)\Private Equity Recruitment Ltd\PER Templates - Documents\perglobal"
 
     # Check if Office User Template folder has been created on OneDrive
     If (!(Test-Path $OfficeUserTemplateDir))
@@ -777,7 +764,7 @@ IF((Test-Path $OneDriveRegistryPath))
         #$(Get-Item "$($OneDriveLocation)\AppData").Attributes = "Hidden"
 
         # Copy normalemail.dotm and normal.dotm files to new directory if they exist
-        $DefaultOfficeUserTemplateDir = "C:\"+$User+"\$($env:username)\AppData\Roaming\Microsoft\Templates"
+        $DefaultOfficeUserTemplateDir = "C:\$($User)\$($env:username)\AppData\Roaming\Microsoft\Templates"
         If (Test-Path "$($DefaultOfficeUserTemplateDir)\Normal.dotm")
         {
             Copy-Item -Path "$($DefaultOfficeUserTemplateDir)\Normal.dotm" -Destination $OfficeUserTemplateDir -ErrorAction Continue
@@ -802,8 +789,6 @@ ELSE
     New-ItemProperty -Path $TemplateRegistryPath -Name $Name -Value $OfficeUserTemplateDir -PropertyType ExpandString -Force
 }
 
-    $UserTemplatesRegValue = (get-item -Path $TemplateRegistryPath).GetValue("UserTemplates")
-
 
     # Check if Office Shared Template file location defined
 
@@ -818,12 +803,10 @@ ELSE
     New-ItemProperty -Path $TemplateRegistryPath -Name $Name -Value $OfficeSharedTemplateDir -PropertyType ExpandString -Force
 }
 
-    $SharedTemplatesRegValue = (get-item -Path $TemplateRegistryPath).GetValue("SharedTemplates")
-
 
     # Check if Word Startup location has been changed to something other than the default location 
     $WordStartupRegPath = "HKCU:\SOFTWARE\Microsoft\Office\16.0\Word\Options"
-    $WordStartupDir = "C:\"+$User+"\$($env:username)\AppData\Roaming\Microsoft\Word\STARTUP"
+    $WordStartupDir = "C:\$($User)\$($env:username)\AppData\Roaming\Microsoft\Word\STARTUP"
         $Name = "STARTUP-PATH"
     if(-not (Test-Path $WordStartupRegPath))
 {
@@ -853,8 +836,8 @@ ELSE
         }
 If (-not (Test-Path $WordStartupDir))
 {
-New-Item -Path "C:\"+$User+"\$($env:username)\AppData\Roaming\Microsoft\" -Name "Word" -ItemType "directory"
-New-Item -Path "C:\"+$User+"\$($env:username)\AppData\Roaming\Microsoft\Word" -Name "STARTUP" -ItemType "directory"
+New-Item -Path "C:\$($User)\$($env:username)\AppData\Roaming\Microsoft\" -Name "Word" -ItemType "directory"
+New-Item -Path "C:\$($User)\$($env:username)\AppData\Roaming\Microsoft\Word" -Name "STARTUP" -ItemType "directory"
 }
     If ((Test-Path $PERglobalDir) -and (Test-Path $WordStartupDir))
     {
@@ -879,9 +862,9 @@ New-Item -Path "C:\"+$User+"\$($env:username)\AppData\Roaming\Microsoft\Word" -N
 # Map remaining OneDrive sites
   If((Test-Path $OneDrivePath))     
    {
-    $path = "C:\"+$User+"\$($env:username)\Private Equity Recruitment Ltd\X Docs - Documents"
+    $path = "C:\$($User)\$($env:username)\Private Equity Recruitment Ltd\X Docs - Documents"
     if(-not (Test-Path $path))
-    {		start $XDocs
+    {		Start-Process $XDocs
     DO
     {
             Start-Sleep -Seconds 1
@@ -890,9 +873,9 @@ New-Item -Path "C:\"+$User+"\$($env:username)\AppData\Roaming\Microsoft\Word" -N
         Until (Test-Path $path)
     }
 
-    $path = "C:\"+$User+"\$($env:username)\Private Equity Recruitment Ltd\Y Docs - Documents"
+    $path = "C:\$($User)\$($env:username)\Private Equity Recruitment Ltd\Y Docs - Documents"
     if(-not (Test-Path $path))
-    {		start $YDocs
+    {		Start-Process $YDocs
     DO
     {
             Start-Sleep -Seconds 1
@@ -901,9 +884,9 @@ New-Item -Path "C:\"+$User+"\$($env:username)\AppData\Roaming\Microsoft\Word" -N
         Until (Test-Path $path)
     }
 
-        $path = "C:\"+$User+"\$($env:username)\Private Equity Recruitment Ltd\Asia - Documents"
+        $path = "C:\$($User)\$($env:username)\Private Equity Recruitment Ltd\Asia - Documents"
     if(-not (Test-Path $path))
-    {		start $Asia
+    {		Start-Process $Asia
     DO
     {
             Start-Sleep -Seconds 1
@@ -912,9 +895,9 @@ New-Item -Path "C:\"+$User+"\$($env:username)\AppData\Roaming\Microsoft\Word" -N
         Until (Test-Path $path)
     }   
     
-    $path = "C:\"+$User+"\$($env:username)\Private Equity Recruitment Ltd\LatAm - Documents"
+    $path = "C:\$($User)\$($env:username)\Private Equity Recruitment Ltd\LatAm - Documents"
     if(-not (Test-Path $path))
-    {		start $LatAm
+    {		Start-Process $LatAm
     DO
     {
         Start-Sleep -Seconds 1
@@ -928,11 +911,11 @@ New-Item -Path "C:\"+$User+"\$($env:username)\AppData\Roaming\Microsoft\Word" -N
     if(Test-Path $path)
 
 
-    { Start 'C:\Program Files (x86)\CloudCall\CloudCall Communicator\cloudcall_communicator.exe'}
+    { Start-Process 'C:\Program Files (x86)\CloudCall\CloudCall Communicator\cloudcall_communicator.exe'}
     ELSE
     {    $path = "C:\Program Files (x86)\CloudCall\Communicator\communicator.exe"
          if(Test-Path $path)
-         { Start 'C:\Program Files (x86)\CloudCall\Communicator\communicator.exe'}
+         { Start-Process 'C:\Program Files (x86)\CloudCall\Communicator\communicator.exe'}
          }
          
     
