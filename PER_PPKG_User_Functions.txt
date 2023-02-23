@@ -30,7 +30,7 @@ $User = switch(Get-WinSystemLocale) {"en-GB" {"Users"} "en-US" {"Users"} "de-DE"
 
 Start-PPKGLog {
 	Write-Host "Making a log file for debugging"
-		$LogPath = "C:\$($User)\OneDrive - Private Equity Recruitment Ltd\PPKG.log"
+		$LogPath = "C:\Users\Public\Documents\PPKG.log"
 		Start-Transcript -path $LogPath -Force -Append
 }
 
