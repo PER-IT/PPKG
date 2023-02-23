@@ -26,6 +26,14 @@ return $false
 
 # Check if provisioning has already been completed
 
+$User = switch(Get-WinSystemLocale) {"en-GB" {"Users"} "en-US" {"Users"} "de-DE" {"Benutzer"} "es-MX" {"Usarios"} "fr-FR" {"Utilisateurs"}}
+
+Start-PPKGLog {
+	Write-Host "Making a log file for debugging"
+		$LogPath = "C:\$($User)\OneDrive - Private Equity Recruitment Ltd\PPKG.log"
+		Start-Transcript -path $LogPath -Force -Append
+}
+
 $FirstRun = "HKCU:\Environment"
 
 if(-not (Test-RegistryValue -Path $FirstRun -Value "Provisioning Complete")){
@@ -37,7 +45,7 @@ if(-not($env:username -eq "PER Guest"))
 
 # Check System Locale & Set Users Folder
 
-$User = switch(Get-WinSystemLocale) {"en-GB" {"Users"} "en-US" {"Users"} "de-DE" {"Benutzer"} "es-MX" {"Usarios"} "fr-FR" {"Utilisateurs"}}
+
 
 
 # Check if OneDrive installed
