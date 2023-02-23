@@ -28,11 +28,9 @@ return $false
 
 $User = switch(Get-WinSystemLocale) {"en-GB" {"Users"} "en-US" {"Users"} "de-DE" {"Benutzer"} "es-MX" {"Usarios"} "fr-FR" {"Utilisateurs"}}
 
-Start-PPKGLog {
 	Write-Host "Making a log file for debugging"
 		$LogPath = "C:\Users\Public\Documents\PPKG.log"
 		Start-Transcript -path $LogPath -Force -Append
-}
 
 $FirstRun = "HKCU:\Environment"
 
