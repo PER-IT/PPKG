@@ -113,7 +113,7 @@ $PrincipalUser =  switch(Get-WinSystemLocale) {"en-GB" {"BUILTIN\USERS"} "en-US"
 
 
 ##Copy Start Menu & Taskbar Layout
-Copy-Item -Path "C:\IT\PPKG\LayoutModification.xml" -Destination "C:\$($User)\Default\AppData\Local\Microsoft\Windows\Shell"
+Copy-Item -Path "C:\IT\PPKG\LayoutModification.xml" -Destination "C:\Users\Default\AppData\Local\Microsoft\Windows\Shell"
 
 ##Copy Task Script & Batch File
 if(-not(Test-Path("C:\IT\UAP")))
