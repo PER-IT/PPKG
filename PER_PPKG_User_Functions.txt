@@ -36,7 +36,7 @@ if(-not (Test-RegistryValue -Path $FirstRun -Value "Provisioning Complete")){
 
 # Check & stop if PER user account
 
-if(-not($env:username -eq "PER Guest"))
+if(-not($env:username -eq "PER Guest") -and -not($env:username -eq "Inventas"))
 {
 
 # Check System Locale & Set Users Folder
