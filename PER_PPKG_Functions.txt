@@ -149,6 +149,19 @@ ELSE
 }
 
 $registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\Edge\Recommended"
+$Name = "DefaultSearchProviderSuggestURL"
+$value = "{google:baseURL}complete/search?output=chrome&q={searchTerms}"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+
+$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\Edge\Recommended"
 $Name = "DefaultSearchProviderSearchURL"
 $value = "{google:baseURL}search?q={searchTerms}&{google:RLZ}{google:originalQueryForSuggestion}{google:assistedQueryStats}{google:searchFieldtrialParameter}{google:searchClient}{google:sourceId}ie={inputEncoding}"
 if(-not (Test-Path $registryPath))
