@@ -275,6 +275,83 @@ ELSE
     New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
 }
 
+#Windows 11 Registry Entries
+$Ver = (Get-CimInstance Win32_OperatingSystem) | Select-Object Caption | Out-String
+
+if ($Ver.Contains("11")) { 
+  Write-host "Windows 11 - Adding additional entries"
+
+$registryPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+$Name = "SearchboxTaskbarMode"
+$value = "0"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+$Name = "ShowTaskViewButton"
+$value = "0"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+$Name = "TaskbarDa"
+$value = "0"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+$Name = "TaskbarMn"
+$value = "0"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+$Name = "TaskbarAl"
+$value = "0"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+}
+else{
+Write-Host "Skipped as Windows 10"
+}
+
+
 $OutlookPath = "HKCU:\SOFTWARE\Microsoft\Office\16.0\Outlook\Setup"
 
 $OutlookPathx64 = "C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE"
