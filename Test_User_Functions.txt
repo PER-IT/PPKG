@@ -44,39 +44,6 @@ if(-not($env:username -eq "PER Guest") -and -not($env:username -eq "Inventas"))
 
 
 
-# Check if OneDrive installed
-
-$OneDrivePath = "C:\Users\$($env:username)\OneDrive - Private Equity Recruitment Ltd"
-$UPN = whoami /upn
-$XDocs = "odopen://sync?userEmail=$UPN&isSiteAdmin=0&siteId={7b0e5e60-fd22-4da5-aa17-1340a7070695}&webId={575f6211-67e1-43ef-ad6e-53b4e00225d0}&webTitle=X Docs&webTemplate=64&webUrl=https://perecruit.sharepoint.com/sites/xdocs&onPrem=0&libraryType=3&listId={19340D54-85E0-4F25-B453-8AB222133B64}&listTitle=Documents&scope=OPENLIST" 
-$YDocs = "odopen://sync?userEmail=$UPN&isSiteAdmin=0&siteId={1b2ea34c-e8fc-4a40-b289-948264b66b55}&webId={575f6211-67e1-43ef-ad6e-53b4e00225d0}&webTitle=Y Docs&webTemplate=64&webUrl=https://perecruit.sharepoint.com/sites/ydocs&onPrem=0&libraryType=3&listId={19340D54-85E0-4F25-B453-8AB222133B64}&listTitle=Documents&scope=OPENLIST" 
-$Asia = "odopen://sync?userEmail=$UPN&isSiteAdmin=0&siteId={d9d56861-5e68-4879-aea0-616afd65d3ea}&webId={f2445e78-9b42-4088-9f46-57a49ab7b358}&webTitle=Asia&webTemplate=64&webUrl=https://perecruit.sharepoint.com/sites/asia&onPrem=0&libraryType=3&listId={A77C897F-E420-420F-AEB4-73FD846DADBB}&listTitle=Documents&scope=OPENLIST" 
-$LatAm = "odopen://sync?userEmail=$UPN&isSiteAdmin=0&siteId={e5b2bb99-38a4-4d8e-bb57-7806db855a51}&webId={f2445e78-9b42-4088-9f46-57a49ab7b358}&webTitle=LatAm&webTemplate=64&webUrl=https://perecruit.sharepoint.com/sites/latam&onPrem=0&libraryType=3&listId={A77C897F-E420-420F-AEB4-73FD846DADBB}&listTitle=Documents&scope=OPENLIST" 
-$Templates = "odopen://sync?userEmail=$UPN&isSiteAdmin=0&siteId={87c2b8ae-fc9d-45e4-9038-00b45151a46e}&webId={575f6211-67e1-43ef-ad6e-53b4e00225d0}&webTitle=PER Templates&webTemplate=64&webUrl=https://perecruit.sharepoint.com/sites/pertemplates&onPrem=0&libraryType=3&listId={19340D54-85E0-4F25-B453-8AB222133B64}&listTitle=Documents&scope=OPENLIST" 
-
-If(-not (Test-Path $OneDrivePath))
-{DO
-    {
-		Start-Sleep -Seconds 1
-
-        }
-        Until (Test-Path $OneDrivePath)
-    }
-    
- 
-    $path = "C:\Users\$($env:username)\Private Equity Recruitment Ltd\PER Templates - Documents"
-    if(-not (Test-Path $path))
-    {      Start-Process $Templates
-    DO
-    {
-		Start-Sleep -Seconds 1
-
-        }
-        Until (Test-Path $path)
-    }
-
-    
-
 #Add Registry Keys
 $registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Feeds"
 $Name = "ShellFeedsTaskbarViewMode"
@@ -861,75 +828,6 @@ New-Item -Path "C:\Users\$($env:username)\AppData\Roaming\Microsoft\Word" -Name 
     "No need to copy"
     }
 }
-
-
-# Map remaining OneDrive sites
-  If((Test-Path $OneDrivePath))     
-   {
-    $path = "C:\Users\$($env:username)\Private Equity Recruitment Ltd\X Docs - Documents"
-    if(-not (Test-Path $path))
-    {		Start-Process $XDocs
-    DO
-    {
-            Start-Sleep -Seconds 1
-
-        }
-        Until (Test-Path $path)
-    }
-
-    $path = "C:\Users\$($env:username)\Private Equity Recruitment Ltd\Y Docs - Documents"
-    if(-not (Test-Path $path))
-    {		Start-Process $YDocs
-    DO
-    {
-            Start-Sleep -Seconds 1
-
-        }
-        Until (Test-Path $path)
-    }
-
-        $path = "C:\Users\$($env:username)\Private Equity Recruitment Ltd\Asia - Documents"
-    if(-not (Test-Path $path))
-    {		Start-Process $Asia
-    DO
-    {
-            Start-Sleep -Seconds 1
-
-        }
-        Until (Test-Path $path)
-    }   
-    
-    $path = "C:\Users\$($env:username)\Private Equity Recruitment Ltd\LatAm - Documents"
-    if(-not (Test-Path $path))
-    {		Start-Process $LatAm
-    DO
-    {
-        Start-Sleep -Seconds 1
-
-        }
-        Until (Test-Path $path)
-    } 
-    }
-
-    $path = "C:\Program Files (x86)\CloudCall\CloudCall Communicator\cloudcall_communicator.exe"
-    if(Test-Path $path)
-
-
-    { Start-Process 'C:\Program Files (x86)\CloudCall\CloudCall Communicator\cloudcall_communicator.exe'}
-    ELSE
-    {    $path = "C:\Program Files (x86)\CloudCall\Communicator\communicator.exe"
-         if(Test-Path $path)
-         { Start-Process 'C:\Program Files (x86)\CloudCall\Communicator\communicator.exe'}
-         }
-         
-    
-$shell = New-Object -ComObject Shell.Application
-$shell.minimizeall()
-start-sleep 1
-$wsh = New-Object -ComObject Wscript.Shell
-$wsh.sendkeys('{F5}')
-start-sleep 1
-$shell.undominimizeall()
 
 
 $Name = "Provisioning Complete"
