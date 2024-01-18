@@ -1,0 +1,297 @@
+Function Enable-SSL {
+	Write-Host "Enabling SSL"
+	[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+}
+
+Function Install-O365 {
+	$O365Setupexe = "https://raw.githubusercontent.com/PER-IT/PPKG/main/setup.exe"
+	Write-Host "Downloading MS Office"
+		New-Item -ItemType Directory -Force -Path "C:\IT\O365"
+		(New-Object System.Net.WebClient).DownloadFile($O365Setupexe, 'C:\IT\O365\setup.exe')
+	Write-Host "Downloading MS Office config files"
+		$O365ConfigSource = "https://raw.githubusercontent.com/PER-IT/PPKG/main/configuration-Office365-x64.xml"
+		$O365ConfigDest = "C:\IT\O365\configuration-Office365-x64.xml"
+		(New-Object System.Net.WebClient).DownloadFile($O365ConfigSource, $O365ConfigDest)
+	Write-Host "Installing Office"
+		& C:\IT\O365\setup.exe /configure $O365ConfigDest | Wait-Process
+}
+
+Function Connect-Wifi {
+	param
+		(
+			[Parameter(Mandatory=$False)]
+			[string]$NetworkSSID,
+
+			[Parameter(Mandatory=$true)]
+			[string]$NetworkPassword,
+
+			[ValidateSet('WEP','WPA','WPA2','WPA2PSK')]
+			[Parameter(Mandatory=$False)]
+			[string]$Authentication = 'WPA2PSK',
+
+			[ValidateSet('AES','TKIP')]
+			[Parameter(Mandatory=$False)]
+			[string]$Encryption = 'AES'
+		)
+
+	# Create the WiFi profile, set the profile to auto connect
+	$WirelessProfile = @'
+<WLANProfile xmlns="http://www.microsoft.com/networking/WLAN/profile/v1">
+	<name>{0}</name>
+	<SSIDConfig>
+		<SSID>
+			<name>{0}</name>
+		</SSID>
+	</SSIDConfig>
+	<connectionType>ESS</connectionType>
+	<connectionMode>auto</connectionMode>
+	<MSM>
+		<security>
+			<authEncryption>
+				<authentication>{2}</authentication>
+				<encryption>{3}</encryption>
+				<useOneX>false</useOneX>
+			</authEncryption>
+			<sharedKey>
+				<keyType>passPhrase</keyType>
+				<protected>false</protected>
+				<keyMaterial>{1}</keyMaterial>
+			</sharedKey>
+		</security>
+	</MSM>
+</WLANProfile>
+'@ -f $NetworkSSID, $NetworkPassword, $Authentication, $Encryption
+
+	# Create the XML file locally
+	$random = Get-Random -Minimum 1111 -Maximum 99999999
+	$tempProfileXML = "$env:TEMP\tempProfile$random.xml"
+	$WirelessProfile | Out-File $tempProfileXML
+
+	# Add the WiFi profile and connect
+	Start-Process netsh ('wlan add profile filename={0}' -f $tempProfileXML)
+
+	# Connect to the WiFi network - only if you need to
+	$WifiNetworks = (netsh wlan show network)
+	$NetworkSSIDSearch = '*' + $NetworkSSID + '*'
+	If ($WifiNetworks -like $NetworkSSIDSearch) {
+		Write-Host "Found SSID: $NetworkSSID `nAttempting to connect"
+		Start-Process netsh ('wlan connect name="{0}"' -f $NetworkSSID)
+		Start-Sleep 5
+		netsh interface show interface
+	} Else {
+		Write-Host "Did not find SSID: $NetworkSSID `nConnection profile stored for later use."
+	}
+
+}
+
+Function Update-Windows {
+	Write-Host "Install Windows Updates"
+		Set-ExecutionPolicy Bypass -Scope Process -Force
+		Enable-SSL
+		Install-Module -Name PSWindowsUpdate -Force
+
+	Get-Package -Name PSWindowsUpdate
+
+        If ($NoDrivers -ne $True) {
+			Write-Host "Checking for DRIVER Updates..."
+			Get-WUInstall -MicrosoftUpdate -AcceptAll -Install -UpdateType Driver -IgnoreReboot -ErrorAction SilentlyContinue -Verbose
+		}
+		If ($NoSoftware -ne $True) {
+			Write-Host "Checking for SOFTWARE Updates..."
+			Get-WUInstall -MicrosoftUpdate -AcceptAll -Install -UpdateType Software -IgnoreReboot -ErrorAction SilentlyContinue -Verbose
+		}
+	Write-Host "End of Install Windows Updates"
+}
+
+
+
+Function Registry-InitialSetup {
+
+    $objSID = New-Object System.Security.Principal.SecurityIdentifier ("S-1-5-32-545")
+    $objUser = $objSID.Translate( [System.Security.Principal.NTAccount])
+    $PrincipalUser = $objUser.Value
+    
+##Copy Start Menu & Taskbar Layout
+Copy-Item -Path "C:\IT\PPKG\LayoutModification.xml" -Destination "C:\Users\Default\AppData\Local\Microsoft\Windows\Shell"
+
+##Copy Task Script & Batch File
+if(-not(Test-Path("C:\IT\UAP")))
+{
+New-Item -Path "C:\IT\" -Name "UAP" -ItemType "directory" -Force
+Copy-Item -Path "C:\IT\PPKG\UserProvisioning.bat" -Destination "C:\IT\UAP\UserProvisioning.bat" -Force
+Copy-Item -Path "C:\IT\PPKG\UserProvisioning.ps1" -Destination "C:\IT\UAP\UserProvisioning.ps1" -Force
+}
+Else{
+Copy-Item -Path "C:\IT\PPKG\UserProvisioning.bat" -Destination "C:\IT\UAP\UserProvisioning.bat" -Force
+Copy-Item -Path "C:\IT\PPKG\UserProvisioning.ps1" -Destination "C:\IT\UAP\UserProvisioning.ps1" -Force
+}
+
+##Create Tasks Triggered @ User Login
+$triggerMain = New-ScheduledTaskTrigger -atlogon
+$actionMain = New-ScheduledTaskAction -Execute "C:\IT\UAP\UserProvisioning.bat"
+$Tasksettings = New-ScheduledTaskSettingsSet -DontStopIfGoingOnBatteries -AllowStartIfOnBatteries
+$Principal = New-ScheduledTaskPrincipal -GroupId $PrincipalUser
+
+Register-ScheduledTask -Action $actionMain -Trigger $triggerMain -TaskName “User Account Provisioning” -Description “Provisions User Accounts” -Settings $Tasksettings -Principal $Principal
+
+##Add HKLM Registry Entries
+$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\Edge\Recommended"
+$Name = "DefaultSearchProviderName"
+$value = "Google"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+
+$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\Edge\Recommended"
+$Name = "DefaultSearchProviderSuggestURL"
+$value = "{google:baseURL}complete/search?output=chrome&q={searchTerms}"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+
+$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\Edge\Recommended"
+$Name = "DefaultSearchProviderSearchURL"
+$value = "{google:baseURL}search?q={searchTerms}&{google:RLZ}{google:originalQueryForSuggestion}{google:assistedQueryStats}{google:searchFieldtrialParameter}{google:searchClient}{google:sourceId}ie={inputEncoding}"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+
+$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\Edge\Recommended"
+$Name = "DefaultSearchProviderEnabled"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\OneDrive"
+$Name = "SilentAccountConfig"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\OneDrive"
+$Name = "KFMSilentOptIn"
+$value = "23889ccd-1612-4908-9333-91802893aab8"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+
+$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\OneDrive"
+$Name = "KFMSilentOptInWithNotification"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\OneDrive"
+$Name = "KFMSilentOptInDesktop"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\OneDrive"
+$Name = "KFMSilentOptInDocuments"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\OneDrive"
+$Name = "KFMSilentOptInPictures"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+$registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\OneDrive"
+$Name = "FilesOnDemandEnabled"
+$value = "1"
+if(-not (Test-Path $registryPath))
+{
+    New-Item -path $registryPath -Force
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+ELSE
+{
+    New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
+}
+
+
+
+
+}
+
+Function Remove-PPKGInstallFolder {
+	Write-Host "Cleaning up and Restarting Computer"
+	PowerShell.exe -NoProfile -ExecutionPolicy Bypass -Command "If (Test-Path C:\IT\PPKG){Remove-Item -LiteralPath 'C:\IT\PPKG' -Force -Recurse};Restart-Computer -Force"
+	Stop-transcript
+	Restart-Computer -Force
+}
+
+Function Start-PPKGLog {
+	Write-Host "Making a log file for debugging"
+		$LogPath = "C:\IT\PPKG.log"
+		Start-Transcript -path $LogPath -Force -Append
+}
