@@ -278,7 +278,24 @@ ELSE
     New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType DWORD -Force
 }
 
+##Install BentonSans
 
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072;(New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/PER-IT/PPKG/main/BentonSans-Bold.otf', 'C:\IT\PPKG\BentonSans-Bold.otf')
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072;(New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/PER-IT/PPKG/main/BentonSans-Book.otf', 'C:\IT\PPKG\BentonSans-Book.otf')
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072;(New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/PER-IT/PPKG/main/BentonSans-ExtraLight.otf', 'C:\IT\PPKG\BentonSans-ExtraLight.otf')
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072;(New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/PER-IT/PPKG/main/BentonSans-Light.otf', 'C:\IT\PPKG\BentonSans-Light.otf')
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072;(New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/PER-IT/PPKG/main/BentonSans-Medium.otf', 'C:\IT\PPKG\BentonSans-Medium.otf')
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072;(New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/PER-IT/PPKG/main/BentonSans-Regular.otf', 'C:\IT\PPKG\BentonSans-Regular.otf')
+
+$FontFolder = 'C:\IT\PPKG\'
+$FontItem = Get-Item -Path $FontFolder
+$FontList = Get-ChildItem -Path "$FontItem\*" -Include ('*.fon','*.otf','*.ttc','*.ttf')
+
+foreach ($Font in $FontList) {
+        Write-Host 'Installing font -' $Font.BaseName
+        Copy-Item $Font "C:\Windows\Fonts"
+        New-ItemProperty -Name $Font.BaseName -Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Fonts" -PropertyType string -Value $Font.name         
+}
 
 
 }
