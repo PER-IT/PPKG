@@ -16,6 +16,31 @@ Function Install-O365 {
 		& C:\IT\O365\setup.exe /configure $O365ConfigDest | Wait-Process
 }
 
+Function Test-RegistryValue {
+
+param (
+
+ [parameter(Mandatory=$true)]
+ [ValidateNotNullOrEmpty()]$Path,
+
+[parameter(Mandatory=$true)]
+ [ValidateNotNullOrEmpty()]$Value
+)
+
+try {
+
+Get-ItemProperty -Path $Path | Select-Object -ExpandProperty $Value -ErrorAction Stop | Out-Null
+ return $true
+ }
+
+catch {
+
+return $false
+
+}
+
+}
+
 Function Connect-Wifi {
 	param
 		(
@@ -146,6 +171,22 @@ if(-not (Test-Path $registryPath))
 ELSE
 {
     New-ItemProperty -Path $registryPath -Name $Name -Value $value -PropertyType STRING -Force
+}
+
+$FontFolder = 'C:\IT\PPKG\'
+$FontItem = Get-Item -Path $FontFolder
+$FontList = Get-ChildItem -Path "$FontItem\*" -Include ('*.fon','*.otf','*.ttc','*.ttf')
+
+foreach ($Font in $FontList) {
+$FontPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Fonts"
+if(-not (Test-RegistryValue $FontPath $Font.BaseName))
+{
+        Write-Host 'Installing font -' $Font.BaseName
+        Copy-Item $Font "C:\Windows\Fonts"
+        New-ItemProperty -Name $Font.BaseName -Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Fonts" -PropertyType string -Value $Font.name         
+        }
+    ELSE
+    {Write-Host 'Already Installed'}
 }
 
 $registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\Edge\Recommended"
