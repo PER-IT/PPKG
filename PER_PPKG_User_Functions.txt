@@ -862,6 +862,11 @@ New-Item -Path "C:\Users\$($env:username)\AppData\Roaming\Microsoft\Word" -Name 
     }
 }
 
+#Set screensaver
+$ScreensaverLoc = "C:\Users\$($env:username)\Private Equity Recruitment Ltd\PER Templates - Documents\setup\Personalisation\PER_Screensaver.scr"
+$ScreensaverReg ="HKCU:\Control Panel\Desktop"
+New-ItemProperty -Path $ScreensaverReg -Name "SCRNSAVE.EXE" -Value $ScreensaverLoc -PropertyType String -Force | Out-Null
+
 
 # Map remaining OneDrive sites
   If((Test-Path $OneDrivePath))     
